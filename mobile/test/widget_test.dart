@@ -1,30 +1,31 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
+import 'package:music_learning_platform/domain/models/auth_models.dart';
 import 'package:music_learning_platform/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('student can open practice from signed in state', (tester) async {
+    await tester.pumpWidget(
+      const MusicLearningApp(
+        initialUser: AppUser(
+          id: 'test-user',
+          name: 'Ana',
+          email: 'ana@example.com',
+          level: 1,
+          xp: 0,
+        ),
+      ),
+    );
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    expect(find.text('Ola, Ana'), findsOneWidget);
+    expect(find.text('Continuar aprendendo'), findsOneWidget);
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    await tester.tap(find.text('Pratica'));
+    await tester.pumpAndSettle();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(
+      find.text('Identifique a cifra americana da nota apresentada.'),
+      findsOneWidget,
+    );
+    expect(find.text('Do'), findsOneWidget);
   });
 }
