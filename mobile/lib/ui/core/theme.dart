@@ -11,7 +11,9 @@ class AppTheme {
   static const Color textSecondary = Color(0xFF94A3B8);
 
   static ThemeData get darkTheme {
-    final baseTextTheme = GoogleFonts.outfitTextTheme(ThemeData.dark().textTheme);
+    final baseTextTheme = GoogleFonts.outfitTextTheme(
+      ThemeData.dark().textTheme,
+    );
 
     return ThemeData.dark().copyWith(
       useMaterial3: true,
@@ -57,12 +59,8 @@ class AppTheme {
           color: textPrimary,
           fontWeight: FontWeight.w600,
         ),
-        bodyLarge: baseTextTheme.bodyLarge?.copyWith(
-          color: textPrimary,
-        ),
-        bodyMedium: baseTextTheme.bodyMedium?.copyWith(
-          color: textSecondary,
-        ),
+        bodyLarge: baseTextTheme.bodyLarge?.copyWith(color: textPrimary),
+        bodyMedium: baseTextTheme.bodyMedium?.copyWith(color: textSecondary),
       ),
       appBarTheme: AppBarTheme(
         backgroundColor: background,
@@ -111,7 +109,10 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: surface,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 18,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
@@ -136,7 +137,10 @@ class AppTheme {
         unselectedIconTheme: IconThemeData(color: textSecondary),
         selectedIconTheme: IconThemeData(color: primary),
         unselectedLabelTextStyle: TextStyle(color: textSecondary),
-        selectedLabelTextStyle: TextStyle(color: primary, fontWeight: FontWeight.bold),
+        selectedLabelTextStyle: TextStyle(
+          color: primary,
+          fontWeight: FontWeight.bold,
+        ),
         elevation: 0,
       ),
       navigationBarTheme: NavigationBarThemeData(
@@ -144,9 +148,17 @@ class AppTheme {
         indicatorColor: primary.withOpacity(0.2),
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return const TextStyle(color: primary, fontSize: 12, fontWeight: FontWeight.w700);
+            return const TextStyle(
+              color: primary,
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+            );
           }
-          return const TextStyle(color: textSecondary, fontSize: 12, fontWeight: FontWeight.w500);
+          return const TextStyle(
+            color: textSecondary,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          );
         }),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {

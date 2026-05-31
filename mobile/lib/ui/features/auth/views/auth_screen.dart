@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../../../data/repositories/auth_repository.dart';
 import '../../../../domain/models/auth_models.dart';
@@ -66,51 +67,92 @@ class _AuthScreenState extends State<AuthScreen> {
 
   @override
   Widget build(BuildContext context) {
+    return Scaffold(
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final isWide = constraints.maxWidth > 800;
+
+          if (isWide) {
+            return Row(
+              children: [
+                Expanded(
+                  flex: 5,
+                  child: const _AuthBrandingPane().animate().fadeIn(
+                    duration: 800.ms,
+                  ),
+                ),
+                Expanded(
+                  flex: 4,
+                  child: _buildForm(
+                    context,
+                  ).animate().fadeIn(delay: 200.ms).slideX(begin: 0.1),
+                ),
+              ],
+            );
+          }
+
+          return SafeArea(
+            child: _buildForm(context).animate().fadeIn().slideY(begin: 0.1),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildForm(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Scaffold(
-      body: SafeArea(
-        child: ResponsiveContent(
-          maxWidth: 640,
-          child: ListView(
-            padding: const EdgeInsets.all(20),
+    return ResponsiveContent(
+      maxWidth: 480,
+      child: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 16),
               Row(
                 children: [
                   Container(
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.primary,
-                      borderRadius: BorderRadius.circular(8),
+                      color: theme.colorScheme.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: theme.colorScheme.primary.withOpacity(0.5),
+                      ),
                     ),
-                    child: const Icon(Icons.graphic_eq, color: Colors.white),
+                    child: Icon(
+                      Icons.graphic_eq,
+                      color: theme.colorScheme.primary,
+                    ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 16),
                   Expanded(
                     child: Text(
-                      'Music Learning Platform',
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w800,
+                      'ZURC Music',
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.w900,
+                        color: theme.colorScheme.primary,
                       ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 36),
+              const SizedBox(height: 40),
               Text(
-                _isCreatingAccount ? 'Criar conta' : 'Entrar',
+                _isCreatingAccount ? 'Criar conta' : 'Bem-vindo de volta',
                 style: theme.textTheme.displaySmall?.copyWith(
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w900,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
-                'Aprenda musica por compreensao, pratica visual e feedback imediato.',
+                'Sua jornada musical fluida e interativa comeca aqui.',
                 style: theme.textTheme.bodyLarge,
               ),
-              const SizedBox(height: 28),
+              const SizedBox(height: 32),
               SegmentedButton<bool>(
                 segments: const [
                   ButtonSegment(
@@ -129,18 +171,17 @@ class _AuthScreenState extends State<AuthScreen> {
                   setState(() => _isCreatingAccount = value.first);
                 },
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
               if (_isCreatingAccount) ...[
                 TextField(
                   controller: _nameController,
                   textInputAction: TextInputAction.next,
                   decoration: const InputDecoration(
                     labelText: 'Nome',
-                    prefixIcon: Icon(Icons.person),
-                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.person_outline),
                   ),
-                ),
-                const SizedBox(height: 12),
+                ).animate().fadeIn().slideY(begin: -0.2),
+                const SizedBox(height: 16),
               ],
               TextField(
                 controller: _emailController,
@@ -148,49 +189,128 @@ class _AuthScreenState extends State<AuthScreen> {
                 textInputAction: TextInputAction.next,
                 decoration: const InputDecoration(
                   labelText: 'Email',
-                  prefixIcon: Icon(Icons.email),
-                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.email_outlined),
                 ),
-              ),
-              const SizedBox(height: 12),
+              ).animate().fadeIn().slideY(begin: -0.2),
+              const SizedBox(height: 16),
               TextField(
                 controller: _passwordController,
                 obscureText: true,
                 decoration: const InputDecoration(
                   labelText: 'Senha',
-                  prefixIcon: Icon(Icons.lock),
-                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.lock_outline),
                 ),
-              ),
-              const SizedBox(height: 12),
+              ).animate().fadeIn().slideY(begin: -0.2),
+              const SizedBox(height: 16),
               Align(
                 alignment: Alignment.centerRight,
-                child: TextButton.icon(
+                child: TextButton(
                   onPressed: () {},
-                  icon: const Icon(Icons.help_outline),
-                  label: const Text('Recuperar senha'),
+                  child: const Text('Esqueceu a senha?'),
                 ),
               ),
               const SizedBox(height: 8),
               if (_errorMessage != null) ...[
-                Text(
-                  _errorMessage!,
-                  style: TextStyle(color: theme.colorScheme.error),
-                ),
-                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.redAccent.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: Colors.redAccent.withOpacity(0.5),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.error_outline, color: Colors.redAccent),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _errorMessage!,
+                          style: const TextStyle(color: Colors.redAccent),
+                        ),
+                      ),
+                    ],
+                  ),
+                ).animate().shakeX(),
+                const SizedBox(height: 16),
               ],
               FilledButton.icon(
                 onPressed: _isLoading ? null : _submit,
                 icon: _isLoading
                     ? const SizedBox.square(
                         dimension: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
                       )
-                    : Icon(_isCreatingAccount ? Icons.person_add : Icons.login),
+                    : Icon(
+                        _isCreatingAccount
+                            ? Icons.person_add
+                            : Icons.arrow_forward,
+                      ),
                 label: Text(_isCreatingAccount ? 'Comecar agora' : 'Entrar'),
+              ).animate().scale(delay: 300.ms),
+              const SizedBox(height: 32),
+              const _LearningPromiseCard(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AuthBrandingPane extends StatelessWidget {
+  const _AuthBrandingPane();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            theme.colorScheme.background,
+            theme.colorScheme.surface.withOpacity(0.8),
+            theme.colorScheme.secondary.withOpacity(0.1),
+            theme.colorScheme.primary.withOpacity(0.2),
+          ],
+        ),
+      ),
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(48),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                    Icons.auto_awesome,
+                    size: 48,
+                    color: theme.colorScheme.primary,
+                  )
+                  .animate(onPlay: (controller) => controller.repeat())
+                  .shimmer(duration: 2000.ms, color: Colors.white),
+              const SizedBox(height: 24),
+              Text(
+                'Compreenda musica de forma intuitiva.',
+                style: theme.textTheme.displayMedium?.copyWith(
+                  fontWeight: FontWeight.w900,
+                  height: 1.1,
+                ),
               ),
               const SizedBox(height: 24),
-              _LearningPromiseCard(theme: theme),
+              Text(
+                'A plataforma ZURC inverte a ordem tradicional. Entenda a logica antes de focar na habilidade motora.',
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
             ],
           ),
         ),
@@ -200,41 +320,43 @@ class _AuthScreenState extends State<AuthScreen> {
 }
 
 class _LearningPromiseCard extends StatelessWidget {
-  const _LearningPromiseCard({required this.theme});
-
-  final ThemeData theme;
+  const _LearningPromiseCard();
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Primeiros 7 dias',
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            const SizedBox(height: 10),
-            const _PromiseItem(
-              icon: Icons.check_circle,
-              text: 'Identificar notas e cifras',
-            ),
-            const _PromiseItem(
-              icon: Icons.check_circle,
-              text: 'Entender escalas e acordes',
-            ),
-            const _PromiseItem(
-              icon: Icons.check_circle,
-              text: 'Praticar em exercicios interativos',
-            ),
-          ],
-        ),
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceVariant.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: theme.colorScheme.surfaceVariant),
       ),
-    );
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'O que voce vai dominar',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 16),
+          const _PromiseItem(
+            icon: Icons.check_circle_outline,
+            text: 'Notas e Cifras Americanas',
+          ),
+          const _PromiseItem(
+            icon: Icons.check_circle_outline,
+            text: 'Formacao de Escalas e Acordes',
+          ),
+          const _PromiseItem(
+            icon: Icons.check_circle_outline,
+            text: 'Campo Harmonico completo',
+          ),
+        ],
+      ),
+    ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.1);
   }
 }
 
@@ -246,13 +368,19 @@ class _PromiseItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: Theme.of(context).colorScheme.primary),
-          const SizedBox(width: 8),
-          Expanded(child: Text(text)),
+          Icon(icon, size: 20, color: theme.colorScheme.primary),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(fontWeight: FontWeight.w500),
+            ),
+          ),
         ],
       ),
     );

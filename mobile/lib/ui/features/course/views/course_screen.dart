@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../../../data/repositories/learning_repository.dart';
 import '../../../../domain/models/course_models.dart';
@@ -62,23 +63,37 @@ class _CourseScreenState extends State<CourseScreen> {
           final modules = snapshot.data!;
 
           return ListView(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(24),
             children: [
               Text(
-                'Curso',
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w800,
+                'Curso Base',
+                style: theme.textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.w900,
+                  color: theme.colorScheme.primary,
                 ),
-              ),
+              ).animate().fadeIn().slideX(begin: -0.1),
               const SizedBox(height: 4),
-              const Text('Da compreensao musical ate os primeiros acordes.'),
-              const SizedBox(height: 18),
-              ...modules.map(
-                (module) => _ModuleCard(
-                  module: module,
-                  onCompleteLesson: _completeLesson,
-                ),
-              ),
+              Text(
+                'Da compreensao musical ate os primeiros acordes.',
+                style: theme.textTheme.bodyLarge,
+              ).animate().fadeIn(delay: 100.ms).slideX(begin: -0.1),
+              const SizedBox(height: 32),
+              ...modules.asMap().entries.map((entry) {
+                final index = entry.key;
+                final module = entry.value;
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child:
+                      _ModuleCard(
+                            module: module,
+                            onCompleteLesson: _completeLesson,
+                          )
+                          .animate()
+                          .fadeIn(delay: (200 + (index * 100)).ms)
+                          .slideY(begin: 0.1),
+                );
+              }),
+              const SizedBox(height: 40),
             ],
           );
         },
@@ -108,13 +123,17 @@ class _CourseMessage extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 42, color: theme.colorScheme.error),
-            const SizedBox(height: 12),
+            Icon(icon, size: 64, color: theme.colorScheme.error)
+                .animate(
+                  onPlay: (controller) => controller.repeat(reverse: true),
+                )
+                .scale(begin: const Offset(1, 1), end: const Offset(1.1, 1.1)),
+            const SizedBox(height: 24),
             Text(
               title,
               textAlign: TextAlign.center,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w800,
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w900,
               ),
             ),
             const SizedBox(height: 8),
@@ -137,70 +156,156 @@ class _ModuleCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: ExpansionTile(
-        leading: Icon(module.icon, color: theme.colorScheme.primary),
-        title: Text(
-          module.title,
-          style: const TextStyle(fontWeight: FontWeight.w800),
+      clipBehavior: Clip.antiAlias,
+      child: Theme(
+        data: theme.copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          iconColor: theme.colorScheme.primary,
+          collapsedIconColor: theme.colorScheme.onSurfaceVariant,
+          tilePadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+          leading: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(module.icon, color: theme.colorScheme.primary),
+          ),
+          title: Text(
+            module.title,
+            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
+          ),
+          subtitle: Text(module.subtitle),
+          trailing: SizedBox(
+            width: 80,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Text(
+                  '${(module.progress * 100).round()}%',
+                  style: const TextStyle(fontWeight: FontWeight.w800),
+                ),
+                const SizedBox(width: 8),
+                const Icon(Icons.expand_more),
+              ],
+            ),
+          ),
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  value: module.progress,
+                  minHeight: 8,
+                  backgroundColor: theme.colorScheme.background,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    theme.colorScheme.primary,
+                  ),
+                ),
+              ),
+            ),
+            ...module.lessons.map(
+              (lesson) =>
+                  _LessonTile(lesson: lesson, onComplete: onCompleteLesson),
+            ),
+            const SizedBox(height: 16),
+          ],
         ),
-        subtitle: Text(module.subtitle),
-        trailing: SizedBox(
-          width: 72,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Text('${(module.progress * 100).round()}%'),
-              const SizedBox(width: 4),
-              const Icon(Icons.expand_more),
-            ],
-          ),
-        ),
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-            child: LinearProgressIndicator(value: module.progress),
-          ),
-          ...module.lessons.map(
-            (lesson) =>
-                _LessonTile(lesson: lesson, onComplete: onCompleteLesson),
-          ),
-          const SizedBox(height: 8),
-        ],
       ),
     );
   }
 }
 
-class _LessonTile extends StatelessWidget {
+class _LessonTile extends StatefulWidget {
   const _LessonTile({required this.lesson, required this.onComplete});
 
   final Lesson lesson;
   final ValueChanged<String> onComplete;
 
   @override
+  State<_LessonTile> createState() => _LessonTileState();
+}
+
+class _LessonTileState extends State<_LessonTile> {
+  bool _isHovering = false;
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color = switch (lesson.status) {
-      LessonStatus.completed => theme.colorScheme.primary,
-      LessonStatus.available => theme.colorScheme.secondary,
-      LessonStatus.locked => Colors.grey.shade500,
-    };
-    final icon = switch (lesson.status) {
-      LessonStatus.completed => Icons.check_circle,
-      LessonStatus.available => Icons.play_circle,
-      LessonStatus.locked => Icons.lock,
-    };
+    final isCompleted = widget.lesson.status == LessonStatus.completed;
+    final isLocked = widget.lesson.status == LessonStatus.locked;
 
-    return ListTile(
-      enabled: lesson.status != LessonStatus.locked,
-      onTap: lesson.status == LessonStatus.completed
-          ? null
-          : () => onComplete(lesson.id),
-      leading: Icon(icon, color: color),
-      title: Text(lesson.title),
-      subtitle: Text(lesson.description),
-      trailing: Text('+${lesson.xp} XP'),
+    final color = isCompleted
+        ? Colors.greenAccent
+        : isLocked
+        ? theme.colorScheme.onSurfaceVariant.withOpacity(0.5)
+        : theme.colorScheme.primary;
+
+    final icon = isCompleted
+        ? Icons.check_circle
+        : isLocked
+        ? Icons.lock
+        : Icons.play_circle_fill;
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovering = true),
+      onExit: (_) => setState(() => _isHovering = false),
+      cursor: isLocked ? SystemMouseCursors.basic : SystemMouseCursors.click,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        color: _isHovering && !isLocked
+            ? theme.colorScheme.surfaceVariant.withOpacity(0.5)
+            : Colors.transparent,
+        child: ListTile(
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 4,
+          ),
+          enabled: !isLocked,
+          onTap: isCompleted ? null : () => widget.onComplete(widget.lesson.id),
+          leading: Icon(icon, color: color, size: 28),
+          title: Text(
+            widget.lesson.title,
+            style: TextStyle(
+              fontWeight: isCompleted ? FontWeight.w600 : FontWeight.w800,
+              decoration: isCompleted ? TextDecoration.lineThrough : null,
+              color: isLocked
+                  ? theme.colorScheme.onSurfaceVariant
+                  : theme.colorScheme.onSurface,
+            ),
+          ),
+          subtitle: Text(
+            widget.lesson.description,
+            style: TextStyle(
+              color: isLocked
+                  ? theme.colorScheme.onSurfaceVariant.withOpacity(0.5)
+                  : theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          trailing: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: isLocked ? Colors.transparent : color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: isLocked
+                    ? theme.colorScheme.onSurfaceVariant.withOpacity(0.2)
+                    : color.withOpacity(0.3),
+              ),
+            ),
+            child: Text(
+              '+${widget.lesson.xp} XP',
+              style: TextStyle(
+                color: isLocked
+                    ? theme.colorScheme.onSurfaceVariant.withOpacity(0.5)
+                    : color,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
