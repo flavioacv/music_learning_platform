@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../data/repositories/learning_repository.dart';
 import '../../../../domain/models/course_models.dart';
 import '../../../core/responsive_content.dart';
+import '../../practice/views/exercise_screen.dart';
 
 class CourseScreen extends StatefulWidget {
   const CourseScreen({super.key, required this.learningRepository});
@@ -23,7 +24,16 @@ class _CourseScreenState extends State<CourseScreen> {
   }
 
   Future<void> _completeLesson(String lessonId) async {
-    await widget.learningRepository.completeLesson(lessonId);
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ExerciseScreen(
+          lessonId: lessonId,
+          repository: widget.learningRepository,
+        ),
+      ),
+    );
+    // Reload modules after returning from exercise screen
     setState(() {
       _modulesFuture = widget.learningRepository.getModules();
     });

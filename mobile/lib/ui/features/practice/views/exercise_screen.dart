@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
 
+import '../../../../data/repositories/learning_repository.dart';
 import '../../../core/responsive_content.dart';
 import '../view_models/exercise_view_model.dart';
 
 class ExerciseScreen extends StatefulWidget {
-  const ExerciseScreen({super.key});
+  const ExerciseScreen({
+    super.key,
+    required this.lessonId,
+    required this.repository,
+  });
+
+  final String lessonId;
+  final LearningRepository repository;
 
   @override
   State<ExerciseScreen> createState() => _ExerciseScreenState();
@@ -16,24 +24,72 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
   @override
   void initState() {
     super.initState();
-    _viewModel = ExerciseViewModel();
+    _viewModel = ExerciseViewModel(widget.repository, widget.lessonId);
+    _viewModel.addListener(_onViewModelChange);
+  }
+
+  void _onViewModelChange() {
+    if (_viewModel.isFinished) {
+      _viewModel.removeListener(_onViewModelChange);
+      _completeAndPop();
+    }
+  }
+
+  Future<void> _completeAndPop() async {
+    // Show a loading overlay or just complete
+    try {
+      await widget.repository.completeLesson(widget.lessonId);
+    } catch (e) {
+      // Ignore error for now
+    }
+    if (mounted) {
+      Navigator.of(context).pop();
+    }
   }
 
   @override
   void dispose() {
+    _viewModel.removeListener(_onViewModelChange);
     _viewModel.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: _viewModel,
-      builder: (context, _) {
-        return ResponsiveContent(
-          child: _ExerciseContent(viewModel: _viewModel),
-        );
-      },
+    return Scaffold(
+      appBar: AppBar(title: const Text('Pratica')),
+      body: ListenableBuilder(
+        listenable: _viewModel,
+        builder: (context, _) {
+          if (_viewModel.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (_viewModel.error != null) {
+            return Center(child: Text('Erro: ${_viewModel.error}'));
+          }
+
+          if (_viewModel.questionCount == 0) {
+            return Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('Nenhum exercicio para esta licao.'),
+                  const SizedBox(height: 16),
+                  FilledButton(
+                    onPressed: _completeAndPop,
+                    child: const Text('Concluir licao'),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return ResponsiveContent(
+            child: _ExerciseContent(viewModel: _viewModel),
+          );
+        },
+      ),
     );
   }
 }
@@ -54,7 +110,7 @@ class _ExerciseContent extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                'Pratica',
+                'Identifique a nota',
                 style: theme.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.w800,
                 ),
@@ -196,8 +252,16 @@ class _FeedbackCard extends StatelessWidget {
             const SizedBox(height: 12),
             FilledButton.icon(
               onPressed: viewModel.next,
-              icon: const Icon(Icons.arrow_forward),
-              label: const Text('Proxima nota'),
+              icon: Icon(
+                viewModel.questionIndex + 1 == viewModel.questionCount
+                    ? Icons.check
+                    : Icons.arrow_forward,
+              ),
+              label: Text(
+                viewModel.questionIndex + 1 == viewModel.questionCount
+                    ? 'Finalizar'
+                    : 'Proxima nota',
+              ),
             ),
           ],
         ),

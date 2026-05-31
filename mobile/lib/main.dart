@@ -4,6 +4,7 @@ import 'data/repositories/auth_repository.dart';
 import 'data/repositories/learning_repository.dart';
 import 'data/services/api_client.dart';
 import 'domain/models/auth_models.dart';
+import 'ui/core/theme.dart';
 import 'ui/features/auth/views/auth_screen.dart';
 import 'ui/features/home/views/home_shell.dart';
 
@@ -48,28 +49,10 @@ class _MusicLearningAppState extends State<MusicLearningApp> {
 
   @override
   Widget build(BuildContext context) {
-    const seed = Color(0xFF007A78);
-
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Music Learning Platform',
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: seed,
-          brightness: Brightness.light,
-        ),
-        scaffoldBackgroundColor: const Color(0xFFF7F5EF),
-        appBarTheme: const AppBarTheme(centerTitle: false),
-        cardTheme: CardThemeData(
-          elevation: 0,
-          color: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-            side: const BorderSide(color: Color(0xFFE3DFD2)),
-          ),
-        ),
-      ),
+      theme: AppTheme.darkTheme,
       home: _user == null
           ? AuthScreen(authRepository: _authRepository, onSignedIn: _signIn)
           : HomeShell(

@@ -5,6 +5,7 @@ import { ZodError } from 'zod';
 
 import { authRoutes } from './modules/auth/auth.routes.js';
 import { catalogRoutes } from './modules/catalog/catalog.routes.js';
+import { exercisesRoutes } from './modules/exercises/exercises.routes.js';
 import { progressRoutes } from './modules/progress/progress.routes.js';
 import { AppError } from './shared/http/errors.js';
 import { failure, success } from './shared/http/response.js';
@@ -23,6 +24,7 @@ export function buildApp() {
 
   app.register(authRoutes, { prefix: '/api/v1/auth' });
   app.register(catalogRoutes, { prefix: '/api/v1/catalog' });
+  app.register(exercisesRoutes, { prefix: '/api/v1/exercises' });
   app.register(progressRoutes, { prefix: '/api/v1/progress' });
 
   app.setErrorHandler((error, request, reply) => {

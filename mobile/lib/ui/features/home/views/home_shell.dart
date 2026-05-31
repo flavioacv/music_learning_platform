@@ -5,7 +5,6 @@ import '../../../../domain/models/auth_models.dart';
 import '../../../../domain/models/progress_models.dart';
 import '../../../core/responsive_content.dart';
 import '../../course/views/course_screen.dart';
-import '../../practice/views/exercise_screen.dart';
 import '../../profile/views/profile_screen.dart';
 
 class HomeShell extends StatefulWidget {
@@ -35,7 +34,6 @@ class _HomeShellState extends State<HomeShell> {
         learningRepository: widget.learningRepository,
       ),
       CourseScreen(learningRepository: widget.learningRepository),
-      const ExerciseScreen(),
       ProfileScreen(user: widget.user, onSignOut: widget.onSignOut),
     ];
 
@@ -55,11 +53,6 @@ class _HomeShellState extends State<HomeShell> {
             icon: Icon(Icons.school_outlined),
             selectedIcon: Icon(Icons.school),
             label: 'Curso',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.quiz_outlined),
-            selectedIcon: Icon(Icons.quiz),
-            label: 'Pratica',
           ),
           NavigationDestination(
             icon: Icon(Icons.person_outline),
