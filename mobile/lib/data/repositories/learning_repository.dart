@@ -77,8 +77,9 @@ class LearningRepository {
     return items.map(Exercise.fromJson).toList();
   }
 
-  Future<void> completeLesson(String lessonId) async {
-    await _apiClient.post('/api/v1/progress/lessons/$lessonId/complete');
+  Future<LessonCompletionResult> completeLesson(String lessonId) async {
+    final response = await _apiClient.post('/api/v1/progress/lessons/$lessonId/complete');
+    return LessonCompletionResult.fromJson(response['data'] as Map<String, dynamic>);
   }
 
   List<Achievement> get achievements => const [

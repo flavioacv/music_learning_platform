@@ -35,7 +35,11 @@ class _HomeShellState extends State<HomeShell> {
         learningRepository: widget.learningRepository,
       ),
       CourseScreen(learningRepository: widget.learningRepository),
-      ProfileScreen(user: widget.user, onSignOut: widget.onSignOut),
+      ProfileScreen(
+        user: widget.user,
+        learningRepository: widget.learningRepository,
+        onSignOut: widget.onSignOut,
+      ),
     ];
 
     return Scaffold(

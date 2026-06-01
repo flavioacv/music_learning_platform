@@ -45,3 +45,28 @@ class ProgressAchievement {
     );
   }
 }
+
+class LessonCompletionResult {
+  const LessonCompletionResult({
+    required this.leveledUp,
+    required this.newLevel,
+    required this.newAchievements,
+  });
+
+  final bool leveledUp;
+  final int newLevel;
+  final List<ProgressAchievement> newAchievements;
+
+  factory LessonCompletionResult.fromJson(Map<String, dynamic> json) {
+    final achievements = (json['newAchievements'] as List<dynamic>? ?? [])
+        .cast<Map<String, dynamic>>()
+        .map(ProgressAchievement.fromJson)
+        .toList();
+
+    return LessonCompletionResult(
+      leveledUp: json['leveledUp'] as bool? ?? false,
+      newLevel: json['newLevel'] as int? ?? 1,
+      newAchievements: achievements,
+    );
+  }
+}

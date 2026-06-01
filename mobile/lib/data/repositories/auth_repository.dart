@@ -35,6 +35,11 @@ class AuthRepository {
     return session;
   }
 
+  Future<AppUser> getMe() async {
+    final json = await _apiClient.get('/api/v1/auth/me');
+    return AppUser.fromJson(json['data'] as Map<String, dynamic>);
+  }
+
   void signOut() {
     _apiClient.setToken(null);
   }

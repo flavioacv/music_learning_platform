@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../../../data/repositories/learning_repository.dart';
+import '../../../../domain/models/progress_models.dart';
 import '../../../core/responsive_content.dart';
 import '../view_models/exercise_view_model.dart';
 
@@ -38,7 +39,13 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
 
   Future<void> _completeAndPop() async {
     try {
-      await widget.repository.completeLesson(widget.lessonId);
+      final result = await widget.repository.completeLesson(widget.lessonId);
+      if (mounted && (result.leveledUp || result.newAchievements.isNotEmpty)) {
+        await showDialog(
+          context: context,
+          builder: (context) => _GamificationDialog(result: result),
+        );
+      }
     } catch (e) {
       // Ignore error for now
     }
@@ -433,6 +440,175 @@ class _FeedbackCard extends StatelessWidget {
             label: Text(isLast ? 'Finalizar Licao' : 'Proxima Nota'),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _GamificationDialog extends StatelessWidget {
+  const _GamificationDialog({required this.result});
+
+  final LessonCompletionResult result;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (result.leveledUp) ...
+              [
+                Container(
+                  width: 96,
+                  height: 96,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        const Color(0xFFFFD700),
+                        const Color(0xFFFFA500),
+                      ],
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFFFFD700).withOpacity(0.5),
+                        blurRadius: 32,
+                        spreadRadius: 4,
+                      ),
+                    ],
+                  ),
+                  child: const Center(
+                    child: Text(
+                      '⬆',
+                      style: TextStyle(fontSize: 48),
+                    ),
+                  ),
+                )
+                    .animate()
+                    .scale(
+                      duration: 600.ms,
+                      curve: Curves.easeOutBack,
+                    )
+                    .then()
+                    .shimmer(duration: 1200.ms),
+                const SizedBox(height: 20),
+                Text(
+                  'Level Up!',
+                  style: theme.textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    color: const Color(0xFFFFD700),
+                    letterSpacing: 1.5,
+                  ),
+                ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.3),
+                const SizedBox(height: 8),
+                Text(
+                  'Voce atingiu o nivel ${result.newLevel}!',
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyLarge,
+                ).animate().fadeIn(delay: 300.ms),
+                const SizedBox(height: 24),
+              ],
+            if (result.newAchievements.isNotEmpty) ...
+              [
+                Text(
+                  result.leveledUp ? 'E ainda...' : 'Conquista desbloqueada!',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ).animate().fadeIn(delay: 400.ms),
+                const SizedBox(height: 16),
+                ...result.newAchievements.asMap().entries.map((entry) {
+                  final idx = entry.key;
+                  final ach = entry.value;
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 16,
+                      ),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            theme.colorScheme.primary.withOpacity(0.15),
+                            theme.colorScheme.secondary.withOpacity(0.08),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: theme.colorScheme.primary.withOpacity(0.4),
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 48,
+                            height: 48,
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.primary.withOpacity(0.2),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.emoji_events,
+                              color: const Color(0xFFFFD700),
+                              size: 28,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  ach.title,
+                                  style: theme.textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                                Text(
+                                  ach.description,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                      .animate()
+                      .fadeIn(delay: (500 + idx * 150).ms)
+                      .slideX(begin: 0.3);
+                }),
+                const SizedBox(height: 8),
+              ],
+            FilledButton.icon(
+              onPressed: () => Navigator.of(context).pop(),
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(52),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+              icon: const Icon(Icons.check_rounded),
+              label: const Text(
+                'Continuar',
+                style: TextStyle(fontWeight: FontWeight.w800),
+              ),
+            ).animate().fadeIn(delay: 700.ms),
+          ],
+        ),
       ),
     );
   }

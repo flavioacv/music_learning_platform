@@ -34,7 +34,6 @@ class _CourseScreenState extends State<CourseScreen> {
         ),
       ),
     );
-    // Reload modules after returning from exercise screen
     setState(() {
       _modulesFuture = widget.learningRepository.getModules();
     });
