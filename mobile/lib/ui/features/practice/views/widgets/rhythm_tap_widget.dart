@@ -1,6 +1,6 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+
 import '../../../../../domain/models/course_models.dart';
 import '../../view_models/exercise_view_model.dart';
 
@@ -19,73 +19,55 @@ class RhythmTapWidget extends StatefulWidget {
 }
 
 class _RhythmTapWidgetState extends State<RhythmTapWidget> {
-  late int _bpm;
-  late List<int> _pattern;
-  
-  Timer? _metronomeTimer;
-  int _currentTick = -1;
-  bool _isPlaying = false;
-  
-  List<bool> _userTaps = [];
+  late final int _bpm;
+  late final List<int> _pattern;
+  late List<bool> _selected;
 
   @override
   void initState() {
     super.initState();
     _bpm = widget.exercise.payload['bpm'] as int;
     _pattern = List<int>.from(widget.exercise.payload['pattern'] ?? []);
-    _userTaps = List.filled(_pattern.length, false);
+    _selected = List.filled(_pattern.length, false);
   }
 
-  @override
-  void dispose() {
-    _metronomeTimer?.cancel();
-    super.dispose();
-  }
+  void _toggleStep(int index) {
+    if (widget.viewModel.hasAnswered) return;
 
-  void _startMetronome() {
-    if (_isPlaying) return;
     setState(() {
-      _isPlaying = true;
-      _currentTick = -1;
-      _userTaps = List.filled(_pattern.length, false);
-    });
-
-    final intervalMs = (60000 / _bpm / 4).round(); // Assuming 16th notes
-    _metronomeTimer = Timer.periodic(Duration(milliseconds: intervalMs), (timer) {
-      if (_currentTick + 1 >= _pattern.length) {
-        timer.cancel();
-        _evaluateTaps();
-        return;
-      }
-      setState(() {
-        _currentTick++;
-      });
+      _selected[index] = !_selected[index];
     });
   }
 
-  void _handleTap() {
-    if (!_isPlaying || _currentTick < 0 || _currentTick >= _pattern.length) return;
+  void _clear() {
+    if (widget.viewModel.hasAnswered) return;
+
     setState(() {
-      _userTaps[_currentTick] = true;
+      _selected = List.filled(_pattern.length, false);
     });
   }
 
-  void _evaluateTaps() {
-    setState(() {
-      _isPlaying = false;
-    });
+  void _submit() {
+    if (widget.viewModel.hasAnswered) return;
 
-    // Evaluate: user must tap when pattern is 1, and not tap when pattern is 0
-    int correctTaps = 0;
-    int expectedTaps = _pattern.where((p) => p == 1).length;
-    
-    for (int i = 0; i < _pattern.length; i++) {
-      if (_pattern[i] == 1 && _userTaps[i]) correctTaps++;
+    final expectedIndexes = <int>[];
+    for (var index = 0; index < _pattern.length; index++) {
+      if (_pattern[index] == 1) expectedIndexes.add(index);
     }
 
-    // Accept if accuracy > 80%
-    bool isCorrect = correctTaps >= expectedTaps * 0.8;
-    widget.viewModel.submitAnswer(isCorrect);
+    final selectedExpected = expectedIndexes
+        .where((index) => _selected[index])
+        .length;
+    final extraTaps = _selected.asMap().entries.where((entry) {
+      return entry.value && _pattern[entry.key] != 1;
+    }).length;
+
+    final expectedCount = expectedIndexes.length;
+    final enoughCorrect =
+        expectedCount == 0 || selectedExpected >= (expectedCount * 0.8).ceil();
+    final fewExtras = extraTaps <= 1;
+
+    widget.viewModel.submitAnswer(enoughCorrect && fewExtras);
   }
 
   @override
@@ -95,7 +77,7 @@ class _RhythmTapWidgetState extends State<RhythmTapWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SizedBox(height: 48),
+        const SizedBox(height: 36),
         Text(
           widget.exercise.prompt,
           textAlign: TextAlign.center,
@@ -103,98 +85,176 @@ class _RhythmTapWidgetState extends State<RhythmTapWidget> {
             fontWeight: FontWeight.w800,
           ),
         ).animate().fadeIn().slideY(begin: -0.1),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         Text(
           'BPM: $_bpm',
           textAlign: TextAlign.center,
           style: theme.textTheme.titleMedium?.copyWith(
             color: theme.colorScheme.primary,
+            fontWeight: FontWeight.w800,
           ),
         ),
-        const SizedBox(height: 48),
-        
-        // Visual indicator of pattern
-        Center(
-          child: Wrap(
-            spacing: 4,
-            runSpacing: 8,
-            children: List.generate(_pattern.length, (index) {
-              final isCurrent = index == _currentTick;
-              final isExpected = _pattern[index] == 1;
-              final isTapped = _userTaps[index];
-              
-              Color dotColor = theme.colorScheme.surfaceVariant;
-              if (isExpected) dotColor = theme.colorScheme.primary.withOpacity(0.5);
-              if (isCurrent) dotColor = theme.colorScheme.secondary;
-              if (isTapped) dotColor = Colors.greenAccent;
-
-              return AnimatedContainer(
-                duration: const Duration(milliseconds: 100),
-                width: 16,
-                height: isExpected ? 32 : 16,
-                decoration: BoxDecoration(
-                  color: dotColor,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              );
-            }),
+        const SizedBox(height: 18),
+        Text(
+          'Marque as partes do compasso onde o som deve acontecer.',
+          textAlign: TextAlign.center,
+          style: theme.textTheme.bodyLarge?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
-        
-        const SizedBox(height: 64),
-        
-        if (!_isPlaying && !widget.viewModel.hasAnswered)
-          Center(
-            child: FilledButton.icon(
-              onPressed: _startMetronome,
-              icon: const Icon(Icons.play_arrow),
-              label: const Text('INICIAR'),
-              style: FilledButton.styleFrom(
-                minimumSize: const Size(200, 56),
+        const SizedBox(height: 32),
+        _RhythmGrid(
+          pattern: _pattern,
+          selected: _selected,
+          hasAnswered: widget.viewModel.hasAnswered,
+          onToggle: _toggleStep,
+        ),
+        const SizedBox(height: 28),
+        if (!widget.viewModel.hasAnswered)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              OutlinedButton.icon(
+                onPressed: _clear,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Limpar'),
               ),
-            ),
-          ),
-          
-        if (_isPlaying)
-          Center(
-            child: GestureDetector(
-              onTapDown: (_) => _handleTap(),
-              child: Container(
-                width: 200,
-                height: 200,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primary.withOpacity(0.2),
-                  shape: BoxShape.circle,
-                  border: Border.all(color: theme.colorScheme.primary, width: 4),
-                ),
-                child: Center(
-                  child: Text(
-                    'TAP',
-                    style: theme.textTheme.displaySmall?.copyWith(
-                      fontWeight: FontWeight.w900,
-                      color: theme.colorScheme.primary,
-                    ),
-                  ),
-                ),
+              const SizedBox(width: 12),
+              FilledButton.icon(
+                onPressed: _selected.any((item) => item) ? _submit : null,
+                icon: const Icon(Icons.check),
+                label: const Text('Conferir padrão'),
               ),
-            ),
+            ],
           ),
-          
         if (widget.viewModel.hasAnswered && !widget.viewModel.isCorrect)
-           Padding(
-             padding: const EdgeInsets.only(top: 24.0),
-             child: Center(
-               child: Text(
-                 'Você perdeu o ritmo. Tente novamente!',
-                 style: TextStyle(
-                   color: Colors.redAccent,
-                   fontWeight: FontWeight.bold,
-                   fontSize: 18,
-                 ),
-               ).animate().fadeIn(),
-             ),
-           ),
+          Padding(
+            padding: const EdgeInsets.only(top: 24),
+            child: Center(
+              child: Text(
+                'Quase. Compare os tempos destacados e tente ouvir o pulso antes de marcar.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.orangeAccent,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ).animate().fadeIn(),
+            ),
+          ),
       ],
     );
+  }
+}
+
+class _RhythmGrid extends StatelessWidget {
+  const _RhythmGrid({
+    required this.pattern,
+    required this.selected,
+    required this.hasAnswered,
+    required this.onToggle,
+  });
+
+  final List<int> pattern;
+  final List<bool> selected;
+  final bool hasAnswered;
+  final ValueChanged<int> onToggle;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final labels = _labelsFor(pattern.length);
+
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 760),
+        child: GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: pattern.length >= 16 ? 8 : 4,
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 10,
+            childAspectRatio: 1.25,
+          ),
+          itemCount: pattern.length,
+          itemBuilder: (context, index) {
+            final isExpected = pattern[index] == 1;
+            final isSelected = selected[index];
+            final isCorrectSelection = hasAnswered && isExpected && isSelected;
+            final isMissing = hasAnswered && isExpected && !isSelected;
+            final isExtra = hasAnswered && !isExpected && isSelected;
+
+            final color = isCorrectSelection
+                ? Colors.greenAccent
+                : isMissing
+                ? Colors.orangeAccent
+                : isExtra
+                ? Colors.redAccent
+                : isSelected
+                ? theme.colorScheme.primary
+                : theme.colorScheme.surfaceVariant;
+
+            final foreground =
+                isSelected || isCorrectSelection || isMissing || isExtra
+                ? Colors.black
+                : theme.colorScheme.onSurface;
+
+            return FilledButton(
+              onPressed: hasAnswered ? null : () => onToggle(index),
+              style: FilledButton.styleFrom(
+                backgroundColor: color,
+                disabledBackgroundColor: color,
+                foregroundColor: foreground,
+                disabledForegroundColor: foreground,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                padding: EdgeInsets.zero,
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    labels[index],
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w900,
+                      fontSize: 18,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Icon(isSelected ? Icons.music_note : Icons.remove, size: 18),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  List<String> _labelsFor(int length) {
+    if (length == 16) {
+      return const [
+        '1',
+        'e',
+        '&',
+        'a',
+        '2',
+        'e',
+        '&',
+        'a',
+        '3',
+        'e',
+        '&',
+        'a',
+        '4',
+        'e',
+        '&',
+        'a',
+      ];
+    }
+
+    return List.generate(length, (index) => '${index + 1}');
   }
 }
