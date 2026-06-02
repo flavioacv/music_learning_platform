@@ -1,11 +1,17 @@
 class UserProgress {
   const UserProgress({
+    required this.currentXp,
+    required this.currentLevel,
     required this.completedLessons,
+    required this.totalLessons,
     required this.totalXpAwarded,
     required this.achievements,
   });
 
+  final int currentXp;
+  final int currentLevel;
   final int completedLessons;
+  final int totalLessons;
   final int totalXpAwarded;
   final List<ProgressAchievement> achievements;
 
@@ -16,7 +22,11 @@ class UserProgress {
         .toList();
 
     return UserProgress(
+      currentXp:
+          (json['currentXp'] as int?) ?? (json['totalXpAwarded'] as int?) ?? 0,
+      currentLevel: json['currentLevel'] as int? ?? 1,
       completedLessons: json['completedLessons'] as int,
+      totalLessons: json['totalLessons'] as int? ?? 0,
       totalXpAwarded: json['totalXpAwarded'] as int,
       achievements: achievements,
     );

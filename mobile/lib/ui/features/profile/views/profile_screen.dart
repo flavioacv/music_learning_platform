@@ -85,8 +85,10 @@ class _ProfileContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final xpForCurrentLevel = (user.level - 1) * 100;
-    final xpProgress = (user.xp - xpForCurrentLevel).clamp(0, 100);
+    final currentXp = progress?.currentXp ?? user.xp;
+    final currentLevel = progress?.currentLevel ?? user.level;
+    final xpForCurrentLevel = (currentLevel - 1) * 100;
+    final xpProgress = (currentXp - xpForCurrentLevel).clamp(0, 100);
     final levelProgress = xpProgress / 100.0;
 
     final unlockedCodes =
@@ -197,7 +199,7 @@ class _ProfileContent extends StatelessWidget {
                             ),
                             const SizedBox(width: 6),
                             Text(
-                              'Nivel ${user.level}',
+                              'Nivel $currentLevel',
                               style: const TextStyle(
                                 fontWeight: FontWeight.w900,
                                 color: Colors.black,
@@ -215,7 +217,7 @@ class _ProfileContent extends StatelessWidget {
                         )
                       else
                         Text(
-                          '${user.xp} XP',
+                          '$currentXp XP',
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w900,
                             color: theme.colorScheme.primary,
@@ -252,7 +254,7 @@ class _ProfileContent extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        'Nivel ${user.level + 1}',
+                        'Nivel ${currentLevel + 1}',
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),

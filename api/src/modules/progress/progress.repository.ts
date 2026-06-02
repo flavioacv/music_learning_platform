@@ -1,17 +1,26 @@
 import { pool } from '../../db/pool.js';
 
 export async function getUserProgress(userId: string) {
-  const progress = await pool.query<{
-    completed_lessons: number;
-    total_xp_awarded: number;
-  }>(
-    `SELECT
-       COUNT(*)::int AS completed_lessons,
-       COALESCE(SUM(xp_awarded), 0)::int AS total_xp_awarded
-     FROM user_lesson_progress
-     WHERE user_id = $1`,
-    [userId],
-  );
+  const [user, progress, totalLessons] = await Promise.all([
+    pool.query<{
+      xp: number;
+      level: number;
+    }>('SELECT xp, level FROM users WHERE id = $1', [userId]),
+    pool.query<{
+      completed_lessons: number;
+      total_xp_awarded: number;
+    }>(
+      `SELECT
+         COUNT(*)::int AS completed_lessons,
+         COALESCE(SUM(xp_awarded), 0)::int AS total_xp_awarded
+       FROM user_lesson_progress
+       WHERE user_id = $1`,
+      [userId],
+    ),
+    pool.query<{ total_lessons: number }>(
+      'SELECT COUNT(*)::int AS total_lessons FROM lessons',
+    ),
+  ]);
 
   const achievements = await pool.query<{
     code: string;
@@ -28,7 +37,10 @@ export async function getUserProgress(userId: string) {
   );
 
   return {
+    currentXp: user.rows[0]?.xp ?? 0,
+    currentLevel: user.rows[0]?.level ?? 1,
     completedLessons: progress.rows[0]?.completed_lessons ?? 0,
+    totalLessons: totalLessons.rows[0]?.total_lessons ?? 0,
     totalXpAwarded: progress.rows[0]?.total_xp_awarded ?? 0,
     achievements: achievements.rows.map((achievement) => ({
       code: achievement.code,
@@ -89,8 +101,8 @@ export async function completeLesson(userId: string, lessonId: string) {
 
     const codesToCheck = [];
     if (completedCount === 1) codesToCheck.push('first_lesson');
-    if (lesson.title === 'Cifras americanas') codesToCheck.push('cipher_reader');
-    if (lesson.title === 'Escalas') codesToCheck.push('scale_builder');
+    if (lesson.title === 'Notacao Americana') codesToCheck.push('cipher_reader');
+    if (lesson.title === 'Construindo Escalas') codesToCheck.push('scale_builder');
 
     for (const code of codesToCheck) {
       const achRes = await client.query(

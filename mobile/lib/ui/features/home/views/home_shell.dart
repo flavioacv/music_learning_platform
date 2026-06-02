@@ -180,9 +180,10 @@ class _DashboardContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final completed = progress?.completedLessons ?? 0;
-    const total = 10;
+    final total = progress?.totalLessons ?? 0;
     final percent = total == 0 ? 0.0 : completed / total;
-    final xp = progress?.totalXpAwarded ?? user.xp;
+    final xp = progress?.currentXp ?? user.xp;
+    final level = progress?.currentLevel ?? user.level;
 
     return ResponsiveContent(
       child: ListView(
@@ -317,7 +318,7 @@ class _DashboardContent extends StatelessWidget {
                 child: _MetricCard(
                   icon: Icons.trending_up,
                   label: 'Nivel',
-                  value: '${user.level}',
+                  value: '$level',
                 ).animate().fadeIn(delay: 500.ms).slideY(begin: 0.1),
               ),
             ],
