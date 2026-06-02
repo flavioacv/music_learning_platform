@@ -6,6 +6,15 @@ import '../../../../domain/models/progress_models.dart';
 import '../../../core/responsive_content.dart';
 import '../view_models/exercise_view_model.dart';
 
+import 'widgets/multiple_choice_widget.dart';
+import 'widgets/fill_blank_widget.dart';
+import 'widgets/rhythm_tap_widget.dart';
+import 'widgets/scale_builder_widget.dart';
+import 'widgets/interval_builder_widget.dart';
+import 'widgets/chord_builder_widget.dart';
+import 'widgets/harmonic_field_builder_widget.dart';
+import 'widgets/audio_recognition_widget.dart';
+
 class ExerciseScreen extends StatefulWidget {
   const ExerciseScreen({
     super.key,
@@ -43,6 +52,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
       if (mounted && (result.leveledUp || result.newAchievements.isNotEmpty)) {
         await showDialog(
           context: context,
+          barrierDismissible: false,
           builder: (context) => _GamificationDialog(result: result),
         );
       }
@@ -66,7 +76,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
     final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Pratica'),
+        title: const Text('Prática'),
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => Navigator.of(context).pop(),
@@ -101,7 +111,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
             );
           }
 
-          if (_viewModel.questionCount == 0) {
+          if (_viewModel.questionCount == 0 || _viewModel.current == null) {
             return Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -138,6 +148,40 @@ class _ExerciseContent extends StatelessWidget {
 
   final ExerciseViewModel viewModel;
 
+  Widget _buildExerciseWidget() {
+    final exercise = viewModel.current!;
+    switch (exercise.type) {
+      case 'multiple_choice':
+        return MultipleChoiceWidget(exercise: exercise, viewModel: viewModel);
+      case 'fill_blank':
+        return FillBlankWidget(exercise: exercise, viewModel: viewModel);
+      case 'rhythm_tap':
+        return RhythmTapWidget(exercise: exercise, viewModel: viewModel);
+      case 'scale_builder':
+        return ScaleBuilderWidget(exercise: exercise, viewModel: viewModel);
+      case 'interval_builder':
+        return IntervalBuilderWidget(exercise: exercise, viewModel: viewModel);
+      case 'chord_builder':
+        return ChordBuilderWidget(exercise: exercise, viewModel: viewModel);
+      case 'harmonic_field_builder':
+        return HarmonicFieldBuilderWidget(exercise: exercise, viewModel: viewModel);
+      case 'audio_recognition':
+        return AudioRecognitionWidget(exercise: exercise, viewModel: viewModel);
+      default:
+        // Se ainda não construímos o widget, exibe um placeholder
+        return Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32.0),
+            child: Text(
+              'Widget para o tipo "${exercise.type}" ainda não implementado.\nPrompt: ${exercise.prompt}',
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.orangeAccent),
+            ),
+          ),
+        );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -155,7 +199,7 @@ class _ExerciseContent extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
-                'Questao ${viewModel.questionIndex + 1} de ${viewModel.questionCount}',
+                'Questão ${viewModel.questionIndex + 1} de ${viewModel.questionCount}',
                 style: const TextStyle(fontWeight: FontWeight.w800),
               ),
             ),
@@ -184,75 +228,15 @@ class _ExerciseContent extends StatelessWidget {
             ),
           ],
         ).animate().fadeIn().slideY(begin: -0.5),
-        const SizedBox(height: 48),
-        Text(
-          'Identifique a cifra americana correspondente',
-          textAlign: TextAlign.center,
-          style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w800,
-          ),
-        ).animate().fadeIn().slideY(begin: -0.1),
-        const SizedBox(height: 48),
-        Center(
+        
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
           child: Container(
-            key: ValueKey(viewModel.current.latin),
-            width: 200,
-            height: 200,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [
-                  theme.colorScheme.primary.withOpacity(0.2),
-                  theme.colorScheme.background,
-                ],
-                radius: 0.8,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: theme.colorScheme.primary.withOpacity(0.1),
-                  blurRadius: 40,
-                  spreadRadius: 10,
-                ),
-              ],
-            ),
-            child: Center(
-              child: Text(
-                viewModel.current.latin,
-                style: theme.textTheme.displayLarge?.copyWith(
-                  fontWeight: FontWeight.w900,
-                  fontSize: 72,
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-            ),
-          ).animate().scale(duration: 400.ms, curve: Curves.easeOutBack),
+            key: ValueKey(viewModel.current!.id),
+            child: _buildExerciseWidget(),
+          ),
         ),
-        const SizedBox(height: 64),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final columns = constraints.maxWidth >= 600 ? 4 : 2;
-            final itemWidth =
-                (constraints.maxWidth - (16 * (columns - 1))) / columns;
-
-            return Wrap(
-              key: ValueKey(viewModel.questionIndex),
-              spacing: 16,
-              runSpacing: 16,
-              children: viewModel.answers.asMap().entries.map((entry) {
-                final index = entry.key;
-                final answer = entry.value;
-                return SizedBox(
-                  width: itemWidth,
-                  height: 80,
-                  child: _AnswerButton(
-                    viewModel: viewModel,
-                    answer: answer,
-                  ).animate().fadeIn(delay: (100 * index).ms).scale(),
-                );
-              }).toList(),
-            );
-          },
-        ),
+        
         const SizedBox(height: 40),
         if (viewModel.hasAnswered)
           _FeedbackCard(
@@ -260,111 +244,6 @@ class _ExerciseContent extends StatelessWidget {
           ).animate().slideY(begin: 0.5, curve: Curves.easeOutExpo),
       ],
     );
-  }
-}
-
-class _AnswerButton extends StatefulWidget {
-  const _AnswerButton({required this.viewModel, required this.answer});
-
-  final ExerciseViewModel viewModel;
-  final String answer;
-
-  @override
-  State<_AnswerButton> createState() => _AnswerButtonState();
-}
-
-class _AnswerButtonState extends State<_AnswerButton> {
-  bool _isHovering = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final wasSelected = widget.viewModel.selectedAnswer == widget.answer;
-    final shouldShowCorrect =
-        widget.viewModel.hasAnswered &&
-        widget.answer == widget.viewModel.current.american;
-    final isWrong = wasSelected && !shouldShowCorrect;
-
-    Color backgroundColor = theme.colorScheme.surface;
-    Color borderColor = theme.colorScheme.surfaceVariant;
-    Color textColor = theme.colorScheme.onSurface;
-
-    if (shouldShowCorrect) {
-      backgroundColor = Colors.greenAccent.withOpacity(0.2);
-      borderColor = Colors.greenAccent;
-      textColor = Colors.greenAccent;
-    } else if (isWrong) {
-      backgroundColor = Colors.redAccent.withOpacity(0.2);
-      borderColor = Colors.redAccent;
-      textColor = Colors.redAccent;
-    } else if (_isHovering && !widget.viewModel.hasAnswered) {
-      borderColor = theme.colorScheme.primary;
-      backgroundColor = theme.colorScheme.primary.withOpacity(0.05);
-    }
-
-    Widget button = MouseRegion(
-      onEnter: (_) => setState(() => _isHovering = true),
-      onExit: (_) => setState(() => _isHovering = false),
-      cursor: widget.viewModel.hasAnswered
-          ? SystemMouseCursors.basic
-          : SystemMouseCursors.click,
-      child: GestureDetector(
-        onTap: () => widget.viewModel.answer(widget.answer),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          decoration: BoxDecoration(
-            color: backgroundColor,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: borderColor, width: 2),
-            boxShadow: shouldShowCorrect
-                ? [
-                    BoxShadow(
-                      color: Colors.greenAccent.withOpacity(0.4),
-                      blurRadius: 20,
-                    ),
-                  ]
-                : isWrong
-                ? [
-                    BoxShadow(
-                      color: Colors.redAccent.withOpacity(0.4),
-                      blurRadius: 20,
-                    ),
-                  ]
-                : _isHovering
-                ? [
-                    BoxShadow(
-                      color: theme.colorScheme.primary.withOpacity(0.2),
-                      blurRadius: 10,
-                    ),
-                  ]
-                : [],
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            widget.answer,
-            style: theme.textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.w900,
-              color: textColor,
-            ),
-          ),
-        ),
-      ),
-    );
-
-    if (isWrong) {
-      button = button
-          .animate(onPlay: (controller) => controller.forward(from: 0))
-          .shakeX(amount: 10);
-    }
-    if (shouldShowCorrect && wasSelected) {
-      button = button
-          .animate(onPlay: (controller) => controller.forward(from: 0))
-          .scale(begin: const Offset(1, 1), end: const Offset(1.05, 1.05))
-          .then()
-          .scale(begin: const Offset(1.05, 1.05), end: const Offset(1, 1));
-    }
-
-    return button;
   }
 }
 
@@ -408,18 +287,13 @@ class _FeedbackCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      viewModel.isCorrect ? 'Excelente!' : 'Quase la...',
+                      viewModel.isCorrect ? 'Excelente!' : 'Ops...',
                       style: theme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w900,
                         color: viewModel.isCorrect
                             ? Colors.greenAccent
                             : Colors.orangeAccent,
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${viewModel.current.latin} corresponde a ${viewModel.current.american}.',
-                      style: theme.textTheme.bodyLarge,
                     ),
                   ],
                 ),
@@ -437,7 +311,7 @@ class _FeedbackCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 20),
             ),
             icon: Icon(isLast ? Icons.done_all : Icons.arrow_forward_rounded),
-            label: Text(isLast ? 'Finalizar Licao' : 'Proxima Nota'),
+            label: Text(isLast ? 'Finalizar Lição' : 'Próxima Questão'),
           ),
         ],
       ),

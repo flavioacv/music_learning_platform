@@ -74,7 +74,12 @@ export async function completeLesson(userId: string, lessonId: string) {
 
     const completedAt = insertRes.rows[0].completed_at;
     let totalXpGained = lesson.xp_reward;
-    const newAchievements: any[] = [];
+    const newAchievements: {
+      code: string;
+      title: string;
+      description: string;
+      unlockedAt: string;
+    }[] = [];
 
     const countRes = await client.query(
       'SELECT COUNT(*)::int as count FROM user_lesson_progress WHERE user_id = $1',
