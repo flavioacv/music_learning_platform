@@ -7,6 +7,7 @@ class Lesson {
     required this.id,
     required this.title,
     required this.description,
+    required this.content,
     required this.xp,
     required this.status,
   });
@@ -14,6 +15,7 @@ class Lesson {
   final String id;
   final String title;
   final String description;
+  final String? content;
   final int xp;
   final LessonStatus status;
 }

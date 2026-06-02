@@ -24,12 +24,12 @@ class _CourseScreenState extends State<CourseScreen> {
     _modulesFuture = widget.learningRepository.getModules();
   }
 
-  Future<void> _completeLesson(String lessonId) async {
+  Future<void> _completeLesson(Lesson lesson) async {
     await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => ExerciseScreen(
-          lessonId: lessonId,
+          lesson: lesson,
           repository: widget.learningRepository,
         ),
       ),
@@ -148,7 +148,7 @@ class _ModuleCard extends StatelessWidget {
   const _ModuleCard({required this.module, required this.onCompleteLesson});
 
   final CourseModule module;
-  final ValueChanged<String> onCompleteLesson;
+  final ValueChanged<Lesson> onCompleteLesson;
 
   @override
   Widget build(BuildContext context) {
@@ -220,7 +220,7 @@ class _LessonTile extends StatefulWidget {
   const _LessonTile({required this.lesson, required this.onComplete});
 
   final Lesson lesson;
-  final ValueChanged<String> onComplete;
+  final ValueChanged<Lesson> onComplete;
 
   @override
   State<_LessonTile> createState() => _LessonTileState();
@@ -262,7 +262,7 @@ class _LessonTileState extends State<_LessonTile> {
             vertical: 4,
           ),
           enabled: !isLocked,
-          onTap: isCompleted ? null : () => widget.onComplete(widget.lesson.id),
+          onTap: isCompleted ? null : () => widget.onComplete(widget.lesson),
           leading: Icon(icon, color: color, size: 28),
           title: Text(
             widget.lesson.title,

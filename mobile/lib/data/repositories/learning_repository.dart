@@ -49,6 +49,7 @@ class LearningRepository {
                   id: lesson['id'] as String,
                   title: lesson['title'] as String,
                   description: lesson['description'] as String,
+                  content: lesson['content'] as String?,
                   xp: lesson['xpReward'] as int,
                   status: status,
                 );

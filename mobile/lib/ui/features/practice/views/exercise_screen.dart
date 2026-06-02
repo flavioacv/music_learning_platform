@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../../../data/repositories/learning_repository.dart';
+import '../../../../domain/models/course_models.dart';
 import '../../../../domain/models/progress_models.dart';
 import '../../../core/responsive_content.dart';
 import '../view_models/exercise_view_model.dart';
@@ -18,11 +19,11 @@ import 'widgets/audio_recognition_widget.dart';
 class ExerciseScreen extends StatefulWidget {
   const ExerciseScreen({
     super.key,
-    required this.lessonId,
+    required this.lesson,
     required this.repository,
   });
 
-  final String lessonId;
+  final Lesson lesson;
   final LearningRepository repository;
 
   @override
@@ -31,12 +32,14 @@ class ExerciseScreen extends StatefulWidget {
 
 class _ExerciseScreenState extends State<ExerciseScreen> {
   late final ExerciseViewModel _viewModel;
+  late bool _showTheory;
 
   @override
   void initState() {
     super.initState();
-    _viewModel = ExerciseViewModel(widget.repository, widget.lessonId);
+    _viewModel = ExerciseViewModel(widget.repository, widget.lesson.id);
     _viewModel.addListener(_onViewModelChange);
+    _showTheory = widget.lesson.content != null && widget.lesson.content!.isNotEmpty;
   }
 
   void _onViewModelChange() {
@@ -48,7 +51,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
 
   Future<void> _completeAndPop() async {
     try {
-      final result = await widget.repository.completeLesson(widget.lessonId);
+      final result = await widget.repository.completeLesson(widget.lesson.id);
       if (mounted && (result.leveledUp || result.newAchievements.isNotEmpty)) {
         await showDialog(
           context: context,
@@ -105,6 +108,66 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                   Text(
                     'Erro: ${_viewModel.error}',
                     style: theme.textTheme.titleMedium,
+                  ),
+                ],
+              ),
+            );
+          }
+
+          if (_showTheory) {
+            return ResponsiveContent(
+              maxWidth: 800,
+              child: ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                children: [
+                  Text(
+                    widget.lesson.title,
+                    style: theme.textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.w900,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ).animate().fadeIn().slideY(begin: -0.1),
+                  const SizedBox(height: 8),
+                  Text(
+                    widget.lesson.description,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ).animate().fadeIn(delay: 100.ms),
+                  const SizedBox(height: 32),
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: theme.colorScheme.surfaceVariant),
+                    ),
+                    child: Text(
+                      widget.lesson.content!,
+                      style: theme.textTheme.bodyLarge?.copyWith(height: 1.6),
+                    ),
+                  ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.1),
+                  const SizedBox(height: 48),
+                  Center(
+                    child: FilledButton.icon(
+                      onPressed: () {
+                        if (_viewModel.questionCount == 0) {
+                          _completeAndPop();
+                        } else {
+                          setState(() {
+                            _showTheory = false;
+                          });
+                        }
+                      },
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size(200, 56),
+                      ),
+                      icon: Icon(_viewModel.questionCount == 0 ? Icons.check_circle : Icons.arrow_forward),
+                      label: Text(
+                        _viewModel.questionCount == 0 ? 'Concluir Lição' : 'Começar Exercícios',
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                    ).animate().fadeIn(delay: 400.ms).scale(),
                   ),
                 ],
               ),

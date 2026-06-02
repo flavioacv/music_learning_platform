@@ -10,6 +10,7 @@ type CourseRow = {
   lesson_id: string | null;
   lesson_title: string | null;
   lesson_description: string | null;
+  lesson_content: string | null;
   lesson_xp_reward: number | null;
 };
 
@@ -25,6 +26,7 @@ export async function listCourses() {
       l.id AS lesson_id,
       l.title AS lesson_title,
       l.description AS lesson_description,
+      l.content AS lesson_content,
       l.xp_reward AS lesson_xp_reward
     FROM courses c
     LEFT JOIN modules m ON m.course_id = c.id
@@ -67,6 +69,7 @@ function mapCourses(rows: CourseRow[]) {
         id: row.lesson_id,
         title: row.lesson_title,
         description: row.lesson_description,
+        content: row.lesson_content,
         xpReward: row.lesson_xp_reward,
       });
     }
