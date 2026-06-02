@@ -453,6 +453,14 @@ class _FeedbackCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 24),
+          if (viewModel.current?.payload['feedback'] case final String feedback)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: Text(
+                feedback,
+                style: theme.textTheme.bodyLarge?.copyWith(height: 1.45),
+              ),
+            ),
           FilledButton.icon(
             onPressed: viewModel.next,
             style: FilledButton.styleFrom(
