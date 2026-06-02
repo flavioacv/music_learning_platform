@@ -17,6 +17,7 @@ class ExerciseViewModel extends ChangeNotifier {
 
   int _questionIndex = 0;
   int _score = 0;
+  int _correctAnswers = 0;
   bool _isFinished = false;
 
   bool _hasAnswered = false;
@@ -26,11 +27,16 @@ class ExerciseViewModel extends ChangeNotifier {
   String? get error => _error;
   bool get isFinished => _isFinished;
 
-  Exercise? get current => _exercises.isEmpty ? null : _exercises[_questionIndex];
+  Exercise? get current =>
+      _exercises.isEmpty ? null : _exercises[_questionIndex];
   int get questionIndex => _questionIndex;
   int get questionCount => _exercises.length;
   int get score => _score;
-  
+  int get correctAnswers => _correctAnswers;
+  double get accuracy =>
+      questionCount == 0 ? 1 : _correctAnswers / questionCount;
+  bool get hasPassed => accuracy >= 0.8;
+
   bool get hasAnswered => _hasAnswered;
   bool get isCorrect => _isCorrect;
 
@@ -55,9 +61,10 @@ class ExerciseViewModel extends ChangeNotifier {
 
     _hasAnswered = true;
     _isCorrect = isCorrect;
-    
+
     if (isCorrect && current != null) {
       _score += current!.xpReward;
+      _correctAnswers += 1;
     }
     notifyListeners();
   }
@@ -69,6 +76,16 @@ class ExerciseViewModel extends ChangeNotifier {
       return;
     }
     _questionIndex += 1;
+    _hasAnswered = false;
+    _isCorrect = false;
+    notifyListeners();
+  }
+
+  void retry() {
+    _questionIndex = 0;
+    _score = 0;
+    _correctAnswers = 0;
+    _isFinished = false;
     _hasAnswered = false;
     _isCorrect = false;
     notifyListeners();

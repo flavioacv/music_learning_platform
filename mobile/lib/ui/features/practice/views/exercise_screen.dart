@@ -44,10 +44,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
   }
 
   void _onViewModelChange() {
-    if (_viewModel.isFinished) {
-      _viewModel.removeListener(_onViewModelChange);
-      _completeAndPop();
-    }
+    if (_viewModel.isFinished) setState(() {});
   }
 
   Future<void> _completeAndPop() async {
@@ -175,6 +172,16 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
             );
           }
 
+          if (_viewModel.isFinished) {
+            return ResponsiveContent(
+              maxWidth: 760,
+              child: _LessonResultView(
+                viewModel: _viewModel,
+                onComplete: _completeAndPop,
+              ),
+            );
+          }
+
           if (_viewModel.questionCount == 0 || _viewModel.current == null) {
             return Center(
               child: Column(
@@ -203,6 +210,104 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
           );
         },
       ),
+    );
+  }
+}
+
+class _LessonResultView extends StatelessWidget {
+  const _LessonResultView({required this.viewModel, required this.onComplete});
+
+  final ExerciseViewModel viewModel;
+  final Future<void> Function() onComplete;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final passed = viewModel.hasPassed;
+    final percent = (viewModel.accuracy * 100).round();
+
+    return ListView(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+      children: [
+        Icon(
+          passed ? Icons.verified_rounded : Icons.replay_circle_filled_rounded,
+          size: 80,
+          color: passed ? Colors.greenAccent : Colors.orangeAccent,
+        ).animate().scale(curve: Curves.easeOutBack),
+        const SizedBox(height: 20),
+        Text(
+          passed ? 'Lição dominada' : 'Vamos reforçar',
+          textAlign: TextAlign.center,
+          style: theme.textTheme.headlineMedium?.copyWith(
+            fontWeight: FontWeight.w900,
+            color: passed ? Colors.greenAccent : Colors.orangeAccent,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          '$percent% de acerto',
+          textAlign: TextAlign.center,
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          '${viewModel.correctAnswers} de ${viewModel.questionCount} exercícios corretos',
+          textAlign: TextAlign.center,
+          style: theme.textTheme.bodyLarge?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 28),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: LinearProgressIndicator(
+            value: viewModel.accuracy,
+            minHeight: 12,
+            backgroundColor: theme.colorScheme.surfaceVariant,
+            valueColor: AlwaysStoppedAnimation<Color>(
+              passed ? Colors.greenAccent : Colors.orangeAccent,
+            ),
+          ),
+        ),
+        const SizedBox(height: 28),
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceVariant.withOpacity(0.35),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: theme.colorScheme.surfaceVariant),
+          ),
+          child: Text(
+            passed
+                ? 'Você atingiu a meta mínima de 80%. A lição será concluída e a próxima etapa será desbloqueada.'
+                : 'A meta mínima é 80%. Revise o feedback das questões e tente de novo para ganhar XP e desbloquear a próxima aula.',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodyLarge?.copyWith(height: 1.45),
+          ),
+        ),
+        const SizedBox(height: 32),
+        if (passed)
+          FilledButton.icon(
+            onPressed: onComplete,
+            icon: const Icon(Icons.check_circle),
+            label: const Text('Concluir e ganhar XP'),
+          )
+        else
+          FilledButton.icon(
+            onPressed: viewModel.retry,
+            icon: const Icon(Icons.refresh),
+            label: const Text('Refazer exercícios'),
+          ),
+        const SizedBox(height: 12),
+        if (!passed)
+          OutlinedButton.icon(
+            onPressed: () => Navigator.of(context).pop(),
+            icon: const Icon(Icons.close),
+            label: const Text('Sair sem concluir'),
+          ),
+      ],
     );
   }
 }

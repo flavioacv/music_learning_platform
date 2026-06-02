@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../../../data/repositories/learning_repository.dart';
 import '../../../../domain/models/auth_models.dart';
+import '../../../../domain/models/course_models.dart';
 import '../../../../domain/models/progress_models.dart';
 import '../../../core/responsive_content.dart';
 import '../../course/views/course_screen.dart';
@@ -33,6 +34,7 @@ class _HomeShellState extends State<HomeShell> {
       DashboardScreen(
         user: widget.user,
         learningRepository: widget.learningRepository,
+        onOpenCourse: () => setState(() => _selectedIndex = 1),
       ),
       CourseScreen(learningRepository: widget.learningRepository),
       ProfileScreen(
@@ -127,10 +129,12 @@ class DashboardScreen extends StatefulWidget {
     super.key,
     required this.user,
     required this.learningRepository,
+    required this.onOpenCourse,
   });
 
   final AppUser user;
   final LearningRepository learningRepository;
+  final VoidCallback onOpenCourse;
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -157,6 +161,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
           progress: progress,
           isLoading: snapshot.connectionState != ConnectionState.done,
           error: snapshot.error,
+          learningRepository: widget.learningRepository,
+          onOpenCourse: widget.onOpenCourse,
         );
       },
     );
@@ -169,12 +175,16 @@ class _DashboardContent extends StatelessWidget {
     required this.progress,
     required this.isLoading,
     required this.error,
+    required this.learningRepository,
+    required this.onOpenCourse,
   });
 
   final AppUser user;
   final UserProgress? progress;
   final bool isLoading;
   final Object? error;
+  final LearningRepository learningRepository;
+  final VoidCallback onOpenCourse;
 
   @override
   Widget build(BuildContext context) {
@@ -333,6 +343,8 @@ class _DashboardContent extends StatelessWidget {
           const SizedBox(height: 16),
           _NextLessonCard(
             theme: theme,
+            learningRepository: learningRepository,
+            onOpenCourse: onOpenCourse,
           ).animate().fadeIn(delay: 700.ms).slideX(begin: 0.1),
           const SizedBox(height: 32),
           Text(
@@ -443,9 +455,15 @@ class _MetricCard extends StatelessWidget {
 }
 
 class _NextLessonCard extends StatefulWidget {
-  const _NextLessonCard({required this.theme});
+  const _NextLessonCard({
+    required this.theme,
+    required this.learningRepository,
+    required this.onOpenCourse,
+  });
 
   final ThemeData theme;
+  final LearningRepository learningRepository;
+  final VoidCallback onOpenCourse;
 
   @override
   State<_NextLessonCard> createState() => _NextLessonCardState();
@@ -453,83 +471,125 @@ class _NextLessonCard extends StatefulWidget {
 
 class _NextLessonCardState extends State<_NextLessonCard> {
   bool _isHovering = false;
+  late Future<({CourseModule module, Lesson lesson})?> _nextLessonFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _nextLessonFuture = _loadNextLesson();
+  }
+
+  Future<({CourseModule module, Lesson lesson})?> _loadNextLesson() async {
+    final modules = await widget.learningRepository.getModules();
+    for (final module in modules) {
+      for (final lesson in module.lessons) {
+        if (lesson.status == LessonStatus.available) {
+          return (module: module, lesson: lesson);
+        }
+      }
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => _isHovering = true),
-      onExit: (_) => setState(() => _isHovering = false),
-      cursor: SystemMouseCursors.click,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        transform: Matrix4.identity()..translate(0.0, _isHovering ? -4.0 : 0.0),
-        child: Card(
-          elevation: _isHovering ? 8 : 0,
-          shadowColor: widget.theme.colorScheme.primary.withOpacity(0.5),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-            side: BorderSide(
-              color: _isHovering
-                  ? widget.theme.colorScheme.primary
-                  : const Color(0xFF2A2E3D),
-              width: _isHovering ? 2 : 1,
-            ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              children: [
-                Container(
-                  width: 64,
-                  height: 64,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        widget.theme.colorScheme.primary,
-                        widget.theme.colorScheme.secondary,
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(
-                    Icons.music_note,
-                    color: Colors.black,
-                    size: 32,
+    return FutureBuilder<({CourseModule module, Lesson lesson})?>(
+      future: _nextLessonFuture,
+      builder: (context, snapshot) {
+        final next = snapshot.data;
+        final title = next?.lesson.title ?? 'Trilha completa';
+        final subtitle = next == null
+            ? 'Você concluiu todas as aulas disponíveis.'
+            : '${next.module.title} • ${next.lesson.description}';
+        final icon = next?.module.icon ?? Icons.verified_rounded;
+
+        return MouseRegion(
+          onEnter: (_) => setState(() => _isHovering = true),
+          onExit: (_) => setState(() => _isHovering = false),
+          cursor: next == null
+              ? SystemMouseCursors.basic
+              : SystemMouseCursors.click,
+          child: GestureDetector(
+            onTap: next == null ? null : widget.onOpenCourse,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              transform: Matrix4.identity()
+                ..translate(0.0, _isHovering && next != null ? -4.0 : 0.0),
+              child: Card(
+                elevation: _isHovering && next != null ? 8 : 0,
+                shadowColor: widget.theme.colorScheme.primary.withOpacity(0.5),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  side: BorderSide(
+                    color: _isHovering && next != null
+                        ? widget.theme.colorScheme.primary
+                        : const Color(0xFF2A2E3D),
+                    width: _isHovering && next != null ? 2 : 1,
                   ),
                 ),
-                const SizedBox(width: 20),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Row(
                     children: [
-                      Text(
-                        'Cifras americanas',
-                        style: widget.theme.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w900,
+                      Container(
+                        width: 64,
+                        height: 64,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              widget.theme.colorScheme.primary,
+                              widget.theme.colorScheme.secondary,
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(icon, color: Colors.black, size: 32),
+                      ),
+                      const SizedBox(width: 20),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              snapshot.connectionState == ConnectionState.done
+                                  ? title
+                                  : 'Carregando próxima aula...',
+                              style: widget.theme.textTheme.titleLarge
+                                  ?.copyWith(fontWeight: FontWeight.w900),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              snapshot.connectionState == ConnectionState.done
+                                  ? subtitle
+                                  : 'Buscando sua trilha atual.',
+                              style: widget.theme.textTheme.bodyLarge,
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Aprenda que Do tambem pode ser C.',
-                        style: widget.theme.textTheme.bodyLarge,
-                      ),
+                      if (snapshot.connectionState != ConnectionState.done)
+                        const SizedBox.square(
+                          dimension: 24,
+                          child: CircularProgressIndicator(strokeWidth: 3),
+                        )
+                      else if (next != null)
+                        Icon(
+                          Icons.arrow_forward_rounded,
+                          color: _isHovering
+                              ? widget.theme.colorScheme.primary
+                              : widget.theme.colorScheme.onSurfaceVariant,
+                          size: 32,
+                        ).animate(target: _isHovering ? 1 : 0).moveX(end: 5),
                     ],
                   ),
                 ),
-                Icon(
-                  Icons.arrow_forward_rounded,
-                  color: _isHovering
-                      ? widget.theme.colorScheme.primary
-                      : widget.theme.colorScheme.onSurfaceVariant,
-                  size: 32,
-                ).animate(target: _isHovering ? 1 : 0).moveX(end: 5),
-              ],
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
