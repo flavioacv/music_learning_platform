@@ -1414,14 +1414,123 @@ async function seed() {
     );
 
     const module5Lessons: SeedLesson[] = [
-      { title: 'O que é um acorde', description: 'Harmonia básica', content: 'Conjunto de notas tocadas juntas.', xpReward: 10, sortOrder: 1 },
-      { title: 'Tríades', description: '3 notas', content: 'Formadas por tônica, terça e quinta.', xpReward: 10, sortOrder: 2 },
-      { title: 'Acordes Maiores', description: 'Som alegre', content: 'Tônica, terça maior, quinta justa.', xpReward: 10, sortOrder: 3 },
-      { title: 'Acordes Menores', description: 'Som triste', content: 'Tônica, terça menor, quinta justa.', xpReward: 10, sortOrder: 4 },
-      { title: 'Acordes Diminutos', description: 'Som tenso', content: 'Tônica, terça menor, quinta diminuta.', xpReward: 10, sortOrder: 5 },
-      { title: 'Acordes Aumentados', description: 'Som expansivo', content: 'Tônica, terça maior, quinta aumentada.', xpReward: 10, sortOrder: 6 },
-      { title: 'Construção de Acordes', description: 'Prática', content: 'Montando tríades.', xpReward: 50, sortOrder: 7 },
-      { title: 'Avaliação Final', description: 'Teste seu dominio', content: 'Teste seus conhecimentos.', xpReward: 100, sortOrder: 8 },
+      {
+        title: 'O que é um acorde',
+        description: 'Harmonia básica',
+        content: lessonContent({
+          Objetivo: 'Entender acorde como notas combinadas para criar harmonia.',
+          Conceito: 'Acorde e um conjunto de notas tocadas juntas ou percebidas como uma unidade. Ele cria sustentacao para melodias e ajuda a definir o clima da musica.',
+          Analogia: 'Se uma nota e uma cor, um acorde e uma mistura de cores que cria uma atmosfera.',
+          'Exemplo visual': ['C + E + G = acorde de C maior', 'A + C + E = acorde de A menor', 'Notas juntas criam harmonia.'],
+          'Exercicio guiado': 'Leia C, E, G. Essas notas formam uma pilha: raiz, terça e quinta.',
+          Desafio: 'Ao ouvir uma musica, tente perceber que ha uma base por baixo da melodia. Essa base costuma ser feita de acordes.',
+          Resumo: ['Acordes combinam notas.', 'Eles criam harmonia.', 'A maioria dos acordes iniciais vem de tríades.', 'Tríades usam raiz, terça e quinta.'],
+        }),
+        xpReward: 10,
+        sortOrder: 1,
+      },
+      {
+        title: 'Tríades',
+        description: '3 notas',
+        content: lessonContent({
+          Objetivo: 'Construir a ideia de tríade usando raiz, terça e quinta.',
+          Conceito: 'Tríade e um acorde de tres notas. A estrutura basica e raiz, terça e quinta. A raiz da nome ao acorde.',
+          Analogia: 'Pense em um sanduiche simples: base, recheio e tampa. A tríade tambem tem tres partes que funcionam juntas.',
+          'Exemplo visual': ['C maior: C E G', 'D menor: D F A', 'G maior: G B D'],
+          'Exercicio guiado': 'Na escala de C, conte C(1), E(3), G(5). Essas notas formam a tríade de C.',
+          Desafio: 'Monte uma tríade pegando a primeira, terceira e quinta notas de uma escala.',
+          Resumo: ['Tríade tem tres notas.', 'Raiz da nome ao acorde.', 'Terça define grande parte da cor.', 'Quinta sustenta o acorde.'],
+        }),
+        xpReward: 10,
+        sortOrder: 2,
+      },
+      {
+        title: 'Acordes Maiores',
+        description: 'Tônica, terça maior e quinta justa.',
+        content: lessonContent({
+          Objetivo: 'Construir acordes maiores com 1, 3 e 5.',
+          Conceito: 'Acorde maior e formado por raiz, terça maior e quinta justa. Em C maior, as notas sao C, E e G.',
+          Analogia: 'Acordes maiores costumam soar claros e estaveis, como abrir uma janela em um dia ensolarado.',
+          'Exemplo visual': ['C maior = C E G', 'G maior = G B D', 'F maior = F A C'],
+          'Exercicio guiado': 'Para montar G maior, use G como raiz, B como terça maior e D como quinta justa.',
+          Desafio: 'Monte C maior sem olhar: C, E, G.',
+          Resumo: ['Maior = raiz + terça maior + quinta justa.', 'C maior = C E G.', 'G maior = G B D.', 'A terça maior e a cor principal do acorde maior.'],
+        }),
+        xpReward: 10,
+        sortOrder: 3,
+      },
+      {
+        title: 'Acordes Menores',
+        description: 'Tônica, terça menor e quinta justa.',
+        content: lessonContent({
+          Objetivo: 'Construir acordes menores e comparar com maiores.',
+          Conceito: 'Acorde menor usa raiz, terça menor e quinta justa. A diferença principal para o maior esta na terça.',
+          Analogia: 'Trocar a terça maior pela terça menor muda a luz do acorde, como mudar uma cena de dia para fim de tarde.',
+          'Exemplo visual': ['A menor = A C E', 'D menor = D F A', 'E menor = E G B'],
+          'Exercicio guiado': 'Compare C maior: C E G com C menor: C Eb G. So a terça mudou.',
+          Desafio: 'Monte A menor: A, C, E.',
+          Resumo: ['Menor = raiz + terça menor + quinta justa.', 'A menor = A C E.', 'A terça menor muda a cor emocional.', 'Maiores e menores diferem principalmente pela terça.'],
+        }),
+        xpReward: 10,
+        sortOrder: 4,
+      },
+      {
+        title: 'Acordes Diminutos',
+        description: 'Tônica, terça menor e quinta diminuta.',
+        content: lessonContent({
+          Objetivo: 'Entender o acorde diminuto como tríade de tensão.',
+          Conceito: 'Acorde diminuto usa raiz, terça menor e quinta diminuta. Em B diminuto, as notas sao B, D e F.',
+          Analogia: 'Ele soa como uma porta entreaberta: cria vontade de resolver em outro acorde.',
+          'Exemplo visual': ['B diminuto = B D F', 'C diminuto = C Eb Gb', 'Estrutura: 1 b3 b5'],
+          'Exercicio guiado': 'Pegue B, conte a terça menor ate D e a quinta diminuta ate F. Isso forma Bdim.',
+          Desafio: 'Qual nota deixa B-D-F com som diminuto? A quinta F.',
+          Resumo: ['Diminuto = raiz + terça menor + quinta diminuta.', 'Bdim = B D F.', 'Ele cria tensão.', 'Aparece no sétimo grau do campo harmonico maior.'],
+        }),
+        xpReward: 10,
+        sortOrder: 5,
+      },
+      {
+        title: 'Acordes Aumentados',
+        description: 'Tônica, terça maior e quinta aumentada.',
+        content: lessonContent({
+          Objetivo: 'Conhecer o acorde aumentado como tríade expansiva.',
+          Conceito: 'Acorde aumentado usa raiz, terça maior e quinta aumentada. Em C aumentado, as notas sao C, E e G#.',
+          Analogia: 'Ele soa como algo suspenso, que ainda nao pousou.',
+          'Exemplo visual': ['C aumentado = C E G#', 'G aumentado = G B D#', 'Estrutura: 1 3 #5'],
+          'Exercicio guiado': 'Compare C maior: C E G. Para C aumentado, suba a quinta G para G#.',
+          Desafio: 'Monte C aumentado: C, E, G#.',
+          Resumo: ['Aumentado = raiz + terça maior + quinta aumentada.', 'Caug = C E G#.', 'A quinta aumentada cria instabilidade.', 'E menos comum no inicio, mas importante para reconhecer cores harmonicas.'],
+        }),
+        xpReward: 10,
+        sortOrder: 6,
+      },
+      {
+        title: 'Construção de Acordes',
+        description: 'Prática',
+        content: lessonContent({
+          Objetivo: 'Montar tríades a partir da estrutura correta.',
+          Conceito: 'Construir acorde e escolher a raiz e empilhar terça e quinta de acordo com o tipo: maior, menor, diminuto ou aumentado.',
+          Analogia: 'E como montar blocos: a base e a raiz, o bloco do meio e a terça, o topo e a quinta.',
+          'Exercicio guiado': 'Para D menor: raiz D, terça menor F, quinta justa A. Resultado: D F A.',
+          Desafio: 'Monte C maior, A menor, B diminuto e C aumentado.',
+          Resumo: ['Identifique a raiz.', 'Escolha a terça certa.', 'Escolha a quinta certa.', 'Confira se o acorde tem exatamente tres notas.'],
+        }),
+        xpReward: 50,
+        sortOrder: 7,
+      },
+      {
+        title: 'Avaliação Final',
+        description: 'Teste seu dominio',
+        content: lessonContent({
+          Objetivo: 'Validar construção de tríades maiores, menores, diminutas e aumentadas.',
+          Conceito: 'A avaliacao confirma se voce entende a estrutura dos acordes, nao apenas seus nomes.',
+          'Antes de comecar': ['Maior = 1 3 5.', 'Menor = 1 b3 5.', 'Diminuto = 1 b3 b5.', 'Aumentado = 1 3 #5.', 'Acordes nascem de intervalos.'],
+          Desafio: 'Monte cada acorde pensando na função de cada nota.',
+          Resumo: ['Acordes criam harmonia.', 'Tríades sao a fundacao.', 'A terça muda maior/menor.', 'A quinta muda diminuto/aumentado.'],
+        }),
+        xpReward: 100,
+        sortOrder: 8,
+      },
     ];
 
     for (const lesson of module5Lessons) {
@@ -1436,10 +1545,110 @@ async function seed() {
 
     const module5Exercises: SeedExercise[] = [
       {
-        lessonOrder: 7,
+        lessonOrder: 1,
+        type: 'multiple_choice',
+        prompt: 'O que e um acorde?',
+        payload: {
+          options: ['Um conjunto de notas que cria harmonia', 'Uma batida por minuto', 'Um tipo de escala sem notas', 'Apenas uma nota isolada'],
+          correctAnswer: 'Um conjunto de notas que cria harmonia',
+          feedback: 'Acorde combina notas para criar harmonia e sustentar melodias.',
+        },
+      },
+      {
+        lessonOrder: 2,
+        type: 'multiple_choice',
+        prompt: 'Quais partes formam uma tríade básica?',
+        payload: {
+          options: ['Raiz, terça e quinta', 'Raiz, BPM e compasso', 'Segunda, quarta e sétima', 'Som, silêncio e volume'],
+          correctAnswer: 'Raiz, terça e quinta',
+          feedback: 'Tríades sao formadas por raiz, terça e quinta.',
+        },
+      },
+      {
+        lessonOrder: 3,
+        type: 'chord_builder',
+        prompt: 'Construa um acorde maior de C',
+        payload: {
+          rootNote: 'C',
+          chordType: 'Major',
+          answer: 'C E G',
+          feedback: 'C maior usa raiz C, terça maior E e quinta justa G.',
+        },
+      },
+      {
+        lessonOrder: 3,
         type: 'chord_builder',
         prompt: 'Construa um acorde maior de G',
-        payload: { rootNote: 'G', chordType: 'Major', answer: 'G B D' },
+        payload: {
+          rootNote: 'G',
+          chordType: 'Major',
+          answer: 'G B D',
+          feedback: 'G maior usa G, B e D: raiz, terça maior e quinta justa.',
+        },
+      },
+      {
+        lessonOrder: 4,
+        type: 'chord_builder',
+        prompt: 'Construa um acorde menor de A',
+        payload: {
+          rootNote: 'A',
+          chordType: 'Minor',
+          answer: 'A C E',
+          feedback: 'A menor usa A, C e E. A terça C da a cor menor.',
+        },
+      },
+      {
+        lessonOrder: 4,
+        type: 'chord_builder',
+        prompt: 'Construa um acorde menor de D',
+        payload: {
+          rootNote: 'D',
+          chordType: 'Minor',
+          answer: 'D F A',
+          feedback: 'D menor usa D, F e A: raiz, terça menor e quinta justa.',
+        },
+      },
+      {
+        lessonOrder: 5,
+        type: 'chord_builder',
+        prompt: 'Construa um acorde diminuto de B',
+        payload: {
+          rootNote: 'B',
+          chordType: 'Diminished',
+          answer: 'B D F',
+          feedback: 'B diminuto usa B, D e F: raiz, terça menor e quinta diminuta.',
+        },
+      },
+      {
+        lessonOrder: 6,
+        type: 'chord_builder',
+        prompt: 'Construa um acorde aumentado de C',
+        payload: {
+          rootNote: 'C',
+          chordType: 'Augmented',
+          answer: 'C E G#',
+          feedback: 'C aumentado usa C, E e G#. A quinta G# cria a cor aumentada.',
+        },
+      },
+      {
+        lessonOrder: 7,
+        type: 'multiple_choice',
+        prompt: 'Qual estrutura representa um acorde menor?',
+        payload: {
+          options: ['1 b3 5', '1 3 5', '1 b3 b5', '1 3 #5'],
+          correctAnswer: '1 b3 5',
+          feedback: 'Acorde menor usa raiz, terça menor e quinta justa: 1 b3 5.',
+        },
+      },
+      {
+        lessonOrder: 8,
+        type: 'multiple_choice',
+        prompt: 'Qual acorde tem as notas C E G?',
+        payload: {
+          options: ['C maior', 'C menor', 'C diminuto', 'A menor'],
+          correctAnswer: 'C maior',
+          feedback: 'C, E e G formam C maior: raiz C, terça maior E e quinta justa G.',
+        },
       },
     ];
 
@@ -1456,12 +1665,94 @@ async function seed() {
     );
 
     const module6Lessons: SeedLesson[] = [
-      { title: 'O que é Campo Harmônico', description: 'A familia de acordes', content: 'Acordes gerados a partir de uma escala.', xpReward: 10, sortOrder: 1 },
-      { title: 'Graus Harmônicos', description: 'Numeração', content: 'I, ii, iii, IV, V, vi, vii°.', xpReward: 10, sortOrder: 2 },
-      { title: 'Campo Harmônico Maior', description: 'Regra geral', content: 'A estrutura fixa dos acordes maiores.', xpReward: 10, sortOrder: 3 },
-      { title: 'Funções Harmônicas', description: 'Tensão e repouso', content: 'Tônica, Subdominante e Dominante.', xpReward: 10, sortOrder: 4 },
-      { title: 'Progressões Harmônicas', description: 'Sequências', content: 'Como combinar os acordes.', xpReward: 50, sortOrder: 5 },
-      { title: 'Avaliação Final', description: 'Teste seu dominio', content: 'Teste seus conhecimentos.', xpReward: 100, sortOrder: 6 },
+      {
+        title: 'O que é Campo Harmônico',
+        description: 'A familia de acordes',
+        content: lessonContent({
+          Objetivo: 'Entender campo harmonico como os acordes que nascem de uma escala.',
+          Conceito: 'Campo harmonico e o conjunto de acordes criados a partir das notas de uma escala. Em C maior, usamos as notas C, D, E, F, G, A e B para formar sete acordes.',
+          Analogia: 'Se a escala e uma familia de notas, o campo harmonico e a familia de acordes que nasce dela.',
+          'Exemplo visual': ['C maior: C D E F G A B', 'Campo harmonico: C, Dm, Em, F, G, Am, Bdim', 'Cada acorde ocupa um grau.'],
+          'Exercicio guiado': 'Pegue C maior. Monte tríades empilhando 1-3-5 a partir de cada nota da escala.',
+          Desafio: 'Memorize a formula de qualidades: maior, menor, menor, maior, maior, menor, diminuto.',
+          Resumo: ['Campo harmonico vem da escala.', 'Cada grau gera um acorde.', 'Em escala maior, a qualidade dos graus e fixa.', 'Progressões usam acordes do campo harmonico.'],
+        }),
+        xpReward: 10,
+        sortOrder: 1,
+      },
+      {
+        title: 'Graus Harmônicos',
+        description: 'Numeração',
+        content: lessonContent({
+          Objetivo: 'Usar números romanos para representar os acordes do campo.',
+          Conceito: 'Graus harmonicos usam números romanos: I, ii, iii, IV, V, vi e vii°. Maiusculo indica acorde maior; minusculo indica acorde menor; o simbolo ° indica diminuto.',
+          Analogia: 'E como chamar os acordes por cargos dentro da familia: primeiro, segundo, terceiro, e assim por diante.',
+          'Exemplo visual': ['I = C', 'ii = Dm', 'iii = Em', 'IV = F', 'V = G', 'vi = Am', 'vii° = Bdim'],
+          'Exercicio guiado': 'Em C maior, conte C como I, Dm como ii, Em como iii.',
+          Desafio: 'Qual grau de C maior e G? Resposta: V.',
+          Resumo: ['Graus tornam progressões transportáveis.', 'I, IV e V costumam ser muito importantes.', 'Maiusculo e maior; minusculo e menor.', 'vii° e diminuto.'],
+        }),
+        xpReward: 10,
+        sortOrder: 2,
+      },
+      {
+        title: 'Campo Harmônico Maior',
+        description: 'Regra geral',
+        content: lessonContent({
+          Objetivo: 'Construir o campo harmonico maior pela formula de qualidades.',
+          Conceito: 'Todo campo harmonico maior segue a ordem: I maior, ii menor, iii menor, IV maior, V maior, vi menor, vii° diminuto.',
+          Analogia: 'A tonalidade muda os nomes, mas os papeis continuam como uma escalação fixa de time.',
+          'Exemplo visual': ['C: C Dm Em F G Am Bdim', 'G: G Am Bm C D Em F#dim', 'Formula: M m m M M m dim'],
+          'Exercicio guiado': 'Para G maior, escreva as notas G A B C D E F#. Depois aplique M m m M M m dim.',
+          Desafio: 'Monte C maior e G maior seguindo a mesma formula.',
+          Resumo: ['Campo maior tem qualidade fixa.', 'I, IV e V sao maiores.', 'ii, iii e vi sao menores.', 'vii° e diminuto.'],
+        }),
+        xpReward: 10,
+        sortOrder: 3,
+      },
+      {
+        title: 'Funções Harmônicas',
+        description: 'Tensão e repouso',
+        content: lessonContent({
+          Objetivo: 'Entender tônica, subdominante e dominante como papeis de movimento.',
+          Conceito: 'Função harmonica descreve o papel de um acorde. Tônica soa como repouso. Subdominante cria saida. Dominante cria tensão e vontade de voltar.',
+          Analogia: 'Pense em casa, passeio e caminho de volta: tônica e casa, subdominante sai de casa, dominante pede retorno.',
+          'Exemplo visual': ['Tônica: I, vi, iii', 'Subdominante: IV, ii', 'Dominante: V, vii°', 'Em C: C repousa, F afasta, G pede volta.'],
+          'Exercicio guiado': 'Toque mentalmente C -> F -> G -> C. Sinta saida, tensão e retorno.',
+          Desafio: 'Qual acorde tem função dominante em C maior? Resposta: G.',
+          Resumo: ['Tônica = repouso.', 'Subdominante = afastamento.', 'Dominante = tensão/retorno.', 'Funções ajudam a entender progressões.'],
+        }),
+        xpReward: 10,
+        sortOrder: 4,
+      },
+      {
+        title: 'Progressões Harmônicas',
+        description: 'Sequências',
+        content: lessonContent({
+          Objetivo: 'Ler progressões como sequencias de graus do campo harmonico.',
+          Conceito: 'Progressão harmonica e uma sequencia de acordes. Progressões famosas usam graus, como I-V-vi-IV, para funcionar em qualquer tonalidade.',
+          Analogia: 'E como uma rota: voce pode fazer o mesmo caminho em cidades diferentes. Os nomes das ruas mudam, mas a ordem dos passos permanece.',
+          'Exemplo visual': ['I-IV-V em C = C F G', 'I-V-vi-IV em C = C G Am F', 'ii-V-I em C = Dm G C'],
+          'Exercicio guiado': 'Pegue I-V-vi-IV em C maior. Substitua cada grau pelo acorde: C, G, Am, F.',
+          Desafio: 'Transforme I-IV-V em G maior: G, C, D.',
+          Resumo: ['Progressões sao sequencias de acordes.', 'Graus permitem transpor tonalidades.', 'I-V-vi-IV aparece em muitas musicas.', 'ii-V-I e muito usado em harmonia.'],
+        }),
+        xpReward: 50,
+        sortOrder: 5,
+      },
+      {
+        title: 'Avaliação Final',
+        description: 'Teste seu dominio',
+        content: lessonContent({
+          Objetivo: 'Validar campo maior, graus, funções e progressões simples.',
+          Conceito: 'A avaliacao confirma se voce consegue montar campos harmonicos e entender o papel dos acordes.',
+          'Antes de comecar': ['Formula: M m m M M m dim.', 'C maior: C Dm Em F G Am Bdim.', 'G maior: G Am Bm C D Em F#dim.', 'Tônica repousa; dominante pede retorno.'],
+          Desafio: 'Monte os sete graus com atenção na ordem e na qualidade.',
+          Resumo: ['Campo harmonico conecta escalas e acordes.', 'Graus explicam progressões.', 'Funções mostram tensão e repouso.', 'Este modulo prepara aplicação musical.'],
+        }),
+        xpReward: 100,
+        sortOrder: 6,
+      },
     ];
 
     for (const lesson of module6Lessons) {
@@ -1476,10 +1767,84 @@ async function seed() {
 
     const module6Exercises: SeedExercise[] = [
       {
+        lessonOrder: 1,
+        type: 'multiple_choice',
+        prompt: 'O que e campo harmonico?',
+        payload: {
+          options: ['A familia de acordes criada por uma escala', 'Uma lista de BPMs', 'Uma nota isolada', 'Um tipo de ritmico'],
+          correctAnswer: 'A familia de acordes criada por uma escala',
+          feedback: 'Campo harmonico e o conjunto de acordes gerados pelas notas de uma escala.',
+        },
+      },
+      {
+        lessonOrder: 2,
+        type: 'multiple_choice',
+        prompt: 'No campo maior, qual grau costuma ser dominante?',
+        payload: {
+          options: ['V', 'I', 'vi', 'ii'],
+          correctAnswer: 'V',
+          feedback: 'O V grau tem função dominante e cria vontade de voltar para o I.',
+        },
+      },
+      {
         lessonOrder: 3,
         type: 'harmonic_field_builder',
         prompt: 'Monte o campo harmônico de C',
-        payload: { key: 'C', answer: ['C', 'Dm', 'Em', 'F', 'G', 'Am', 'Bdim'] },
+        payload: {
+          key: 'C',
+          answer: ['C', 'Dm', 'Em', 'F', 'G', 'Am', 'Bdim'],
+          feedback: 'C maior segue M m m M M m dim: C, Dm, Em, F, G, Am, Bdim.',
+        },
+      },
+      {
+        lessonOrder: 3,
+        type: 'harmonic_field_builder',
+        prompt: 'Monte o campo harmônico de G',
+        payload: {
+          key: 'G',
+          answer: ['G', 'Am', 'Bm', 'C', 'D', 'Em', 'F#dim'],
+          feedback: 'G maior segue a mesma formula: G, Am, Bm, C, D, Em, F#dim.',
+        },
+      },
+      {
+        lessonOrder: 4,
+        type: 'multiple_choice',
+        prompt: 'Em C maior, qual acorde tem função dominante principal?',
+        payload: {
+          options: ['G', 'C', 'Am', 'F'],
+          correctAnswer: 'G',
+          feedback: 'Em C maior, G e o V grau. Ele cria tensão que costuma resolver em C.',
+        },
+      },
+      {
+        lessonOrder: 5,
+        type: 'multiple_choice',
+        prompt: 'Qual progressão corresponde a I-V-vi-IV em C maior?',
+        payload: {
+          options: ['C G Am F', 'C F G Am', 'Dm G C F', 'G Am F C'],
+          correctAnswer: 'C G Am F',
+          feedback: 'Em C maior: I=C, V=G, vi=Am, IV=F.',
+        },
+      },
+      {
+        lessonOrder: 5,
+        type: 'multiple_choice',
+        prompt: 'Qual progressão corresponde a I-IV-V em G maior?',
+        payload: {
+          options: ['G C D', 'C D G', 'G Am Bm', 'D C G'],
+          correctAnswer: 'G C D',
+          feedback: 'Em G maior: I=G, IV=C, V=D.',
+        },
+      },
+      {
+        lessonOrder: 6,
+        type: 'multiple_choice',
+        prompt: 'Qual formula de qualidades do campo maior esta correta?',
+        payload: {
+          options: ['M m m M M m dim', 'M M M m m dim M', 'm M m M dim M m', 'M m dim m M M m'],
+          correctAnswer: 'M m m M M m dim',
+          feedback: 'Todo campo harmonico maior segue: maior, menor, menor, maior, maior, menor, diminuto.',
+        },
       },
     ];
 
@@ -1496,13 +1861,109 @@ async function seed() {
     );
 
     const module7Lessons: SeedLesson[] = [
-      { title: 'Analisando uma música', description: 'Visão geral', content: 'Como desconstruir uma música.', xpReward: 10, sortOrder: 1 },
-      { title: 'Encontrando o Tom', description: 'Qual a chave?', content: 'Descobrindo o centro tonal.', xpReward: 10, sortOrder: 2 },
-      { title: 'Identificando Escalas', description: 'Qual usar?', content: 'Encontrando a escala correta.', xpReward: 10, sortOrder: 3 },
-      { title: 'Identificando Acordes', description: 'Harmonia', content: 'Mapeando os acordes usados.', xpReward: 10, sortOrder: 4 },
-      { title: 'Montando Progressões', description: 'Prática', content: 'Criando suas próprias sequências.', xpReward: 50, sortOrder: 5 },
-      { title: 'Criando acompanhamentos', description: 'Tocando junto', content: 'Como acompanhar uma melodia.', xpReward: 50, sortOrder: 6 },
-      { title: 'Avaliação Final', description: 'Teste seu dominio', content: 'Teste seus conhecimentos.', xpReward: 100, sortOrder: 7 },
+      {
+        title: 'Analisando uma música',
+        description: 'Visão geral',
+        content: lessonContent({
+          Objetivo: 'Aprender a observar uma musica por partes: tom, escala, acordes, ritmo e progressao.',
+          Conceito: 'Analisar uma musica e desmontar sua estrutura para entender como ela funciona. Em vez de ouvir tudo como uma massa unica, voce procura padroes.',
+          Analogia: 'E como olhar uma receita pronta e descobrir quais ingredientes foram usados.',
+          'Exemplo visual': ['Tom: C maior', 'Progressao: C G Am F', 'Ritmo: pulso em 4/4'],
+          'Exercicio guiado': 'Pegue a progressao C G Am F. Pergunte: qual acorde parece casa? Qual acorde cria movimento?',
+          Desafio: 'Escolha uma musica simples e tente identificar se ela parece estar em maior ou menor.',
+          Resumo: ['Analise musical junta todos os módulos anteriores.', 'Tom indica centro.', 'Acordes mostram harmonia.', 'Progressões mostram movimento.'],
+        }),
+        xpReward: 10,
+        sortOrder: 1,
+      },
+      {
+        title: 'Encontrando o Tom',
+        description: 'Qual a chave?',
+        content: lessonContent({
+          Objetivo: 'Entender tom como centro de repouso da musica.',
+          Conceito: 'O tom e a nota ou acorde que parece casa. Muitas musicas terminam ou repousam no acorde do tom.',
+          Analogia: 'Durante uma viagem, voce pode passar por muitos lugares, mas casa e onde a sensacao resolve.',
+          'Exemplo visual': ['Em C maior, C costuma soar como casa.', 'Em G maior, G costuma soar como casa.', 'A progressao C G Am F geralmente aponta para C.'],
+          'Exercicio guiado': 'Olhe a progressao C F G C. O acorde C aparece como inicio e retorno; isso sugere tom de C.',
+          Desafio: 'Em G C D G, qual acorde parece casa? Resposta: G.',
+          Resumo: ['Tom e centro musical.', 'O acorde I costuma soar como repouso.', 'O final da progressao pode dar pistas.', 'Campo harmonico ajuda a confirmar o tom.'],
+        }),
+        xpReward: 10,
+        sortOrder: 2,
+      },
+      {
+        title: 'Identificando Escalas',
+        description: 'Qual usar?',
+        content: lessonContent({
+          Objetivo: 'Relacionar tom e escala provavel.',
+          Conceito: 'Se a musica esta em C maior, a escala de C maior costuma ser o primeiro mapa de notas. Se esta em G maior, use G maior como mapa inicial.',
+          Analogia: 'A escala e o mapa da cidade; o tom diz qual cidade voce esta visitando.',
+          'Exemplo visual': ['Tom C maior -> escala C D E F G A B', 'Tom G maior -> escala G A B C D E F#', 'Tom D maior -> escala D E F# G A B C#'],
+          'Exercicio guiado': 'Se os acordes sao C, F, G e Am, todos cabem em C maior.',
+          Desafio: 'Qual escala combina com G, C, D e Em? Resposta: G maior.',
+          Resumo: ['Tom sugere escala.', 'Acordes do campo confirmam a escala.', 'Escala vira mapa para melodias.', 'Nem toda musica fica presa a uma escala, mas esse e o primeiro passo.'],
+        }),
+        xpReward: 10,
+        sortOrder: 3,
+      },
+      {
+        title: 'Identificando Acordes',
+        description: 'Harmonia',
+        content: lessonContent({
+          Objetivo: 'Mapear acordes e reconhecer seus graus.',
+          Conceito: 'Identificar acordes e perguntar qual papel cada um exerce no tom. Em C maior, C e I, F e IV, G e V, Am e vi.',
+          Analogia: 'Os acordes sao personagens; os graus dizem o papel de cada personagem na historia.',
+          'Exemplo visual': ['C = I', 'G = V', 'Am = vi', 'F = IV'],
+          'Exercicio guiado': 'Na progressao C G Am F, substitua nomes por graus: I V vi IV.',
+          Desafio: 'Em G D Em C, quais sao os graus em G maior? I V vi IV.',
+          Resumo: ['Acordes podem ser lidos por nomes ou graus.', 'Graus facilitam transposicao.', 'Progressões famosas aparecem em muitos tons.', 'Identificar graus revela a estrutura.'],
+        }),
+        xpReward: 10,
+        sortOrder: 4,
+      },
+      {
+        title: 'Montando Progressões',
+        description: 'Prática',
+        content: lessonContent({
+          Objetivo: 'Criar progressões simples usando graus do campo harmonico.',
+          Conceito: 'Uma progressão combina acordes em uma ordem. I-IV-V soa direto e classico. I-V-vi-IV soa familiar em muitas musicas populares.',
+          Analogia: 'E como montar uma frase com palavras que ja pertencem ao mesmo idioma.',
+          'Exemplo visual': ['I-IV-V em C = C F G', 'I-V-vi-IV em C = C G Am F', 'ii-V-I em C = Dm G C'],
+          'Exercicio guiado': 'Escolha C maior e monte I-V-vi-IV: C, G, Am, F.',
+          Desafio: 'Monte I-IV-V em G maior: G, C, D.',
+          Resumo: ['Progressão e sequencia de acordes.', 'Use graus para pensar melhor.', 'I, IV, V e vi sao muito comuns.', 'Progressões criam expectativa e retorno.'],
+        }),
+        xpReward: 50,
+        sortOrder: 5,
+      },
+      {
+        title: 'Criando acompanhamentos',
+        description: 'Tocando junto',
+        content: lessonContent({
+          Objetivo: 'Entender acompanhamento como repetição ritmica de acordes.',
+          Conceito: 'Acompanhamento e tocar acordes em um ritmo para sustentar a musica. Mesmo sem instrumento real, voce pode planejar a ordem dos acordes e o pulso.',
+          Analogia: 'Se a melodia e a voz principal, o acompanhamento e o corpo que segura a musica de pé.',
+          'Exemplo visual': ['C | G | Am | F', 'Um acorde por compasso', 'Pulso: 1 2 3 4'],
+          'Exercicio guiado': 'Imagine C por quatro tempos, depois G por quatro, Am por quatro e F por quatro.',
+          Desafio: 'Crie uma progressao de quatro acordes usando o campo de C maior.',
+          Resumo: ['Acompanhamento junta acordes e ritmo.', 'Um acorde por compasso e um bom começo.', 'Progressões simples ja soam musicais.', 'Controle de pulso evita bagunca.'],
+        }),
+        xpReward: 50,
+        sortOrder: 6,
+      },
+      {
+        title: 'Avaliação Final',
+        description: 'Teste seu dominio',
+        content: lessonContent({
+          Objetivo: 'Validar leitura de tom, escala, graus e progressões simples.',
+          Conceito: 'A avaliação confirma se voce consegue transformar teoria em leitura musical pratica.',
+          'Antes de comecar': ['C G Am F = I V vi IV em C.', 'G C D = I IV V em G.', 'Tom e o centro de repouso.', 'Escala e o mapa de notas.'],
+          Desafio: 'Leia cada progressao como graus, nao apenas como nomes soltos.',
+          Resumo: ['Aplicação musical junta tudo.', 'Acordes viram progressões.', 'Progressões indicam movimento.', 'Analise deixa musicas reais menos misteriosas.'],
+        }),
+        xpReward: 100,
+        sortOrder: 7,
+      },
     ];
 
     for (const lesson of module7Lessons) {
@@ -1514,7 +1975,80 @@ async function seed() {
       [module7Id],
     );
     const lesson7IdByOrder = new Map(lessonsMod7Res.rows.map((lesson) => [lesson.sort_order, lesson.id]));
-    await syncModuleExercises(client, module7Id, lesson7IdByOrder, []);
+    const module7Exercises: SeedExercise[] = [
+      {
+        lessonOrder: 1,
+        type: 'multiple_choice',
+        prompt: 'O que significa analisar uma musica?',
+        payload: {
+          options: ['Entender suas partes e padroes', 'Aumentar o BPM sempre', 'Trocar todas as notas por sustenidos', 'Tocar sem ouvir'],
+          correctAnswer: 'Entender suas partes e padroes',
+          feedback: 'Analisar e separar tom, acordes, ritmo e progressao para entender como a musica funciona.',
+        },
+      },
+      {
+        lessonOrder: 2,
+        type: 'multiple_choice',
+        prompt: 'Na progressao C F G C, qual acorde parece casa?',
+        payload: {
+          options: ['C', 'F', 'G', 'Am'],
+          correctAnswer: 'C',
+          feedback: 'C aparece como partida e retorno, sugerindo tom de C maior.',
+        },
+      },
+      {
+        lessonOrder: 3,
+        type: 'multiple_choice',
+        prompt: 'Qual escala combina primeiro com os acordes G, C, D e Em?',
+        payload: {
+          options: ['G maior', 'C# maior', 'F menor', 'B diminuto'],
+          correctAnswer: 'G maior',
+          feedback: 'G, C, D e Em pertencem ao campo harmonico de G maior.',
+        },
+      },
+      {
+        lessonOrder: 4,
+        type: 'multiple_choice',
+        prompt: 'Em C maior, a progressao C G Am F vira quais graus?',
+        payload: {
+          options: ['I V vi IV', 'I IV V vi', 'ii V I IV', 'V vi IV I'],
+          correctAnswer: 'I V vi IV',
+          feedback: 'Em C maior: C=I, G=V, Am=vi e F=IV.',
+        },
+      },
+      {
+        lessonOrder: 5,
+        type: 'multiple_choice',
+        prompt: 'Qual progressao e I-IV-V em G maior?',
+        payload: {
+          options: ['G C D', 'C G D', 'G D Em', 'D G C'],
+          correctAnswer: 'G C D',
+          feedback: 'Em G maior: I=G, IV=C, V=D.',
+        },
+      },
+      {
+        lessonOrder: 6,
+        type: 'rhythm_tap',
+        prompt: 'Marque um acorde por tempo forte em 4/4',
+        payload: {
+          bpm: 76,
+          pattern: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+          feedback: 'Este exercicio simula trocar ou marcar acorde no tempo 1 do compasso.',
+        },
+      },
+      {
+        lessonOrder: 7,
+        type: 'multiple_choice',
+        prompt: 'Qual frase resume melhor aplicação musical?',
+        payload: {
+          options: ['Usar notas, ritmo, escalas e acordes para entender musicas reais', 'Decorar nomes sem ouvir', 'Ignorar progressões', 'Usar apenas uma nota'],
+          correctAnswer: 'Usar notas, ritmo, escalas e acordes para entender musicas reais',
+          feedback: 'Aplicação musical junta os fundamentos para ler, criar e acompanhar musicas.',
+        },
+      },
+    ];
+
+    await syncModuleExercises(client, module7Id, lesson7IdByOrder, module7Exercises);
 
     // --- MODULO 8: TREINO AUDITIVO ---
     console.log('Inserindo Módulo 8...');
@@ -1527,12 +2061,94 @@ async function seed() {
     );
 
     const module8Lessons: SeedLesson[] = [
-      { title: 'Reconhecimento de Notas', description: 'Ouvido absoluto e relativo', content: 'Treinando a percepção de notas.', xpReward: 50, sortOrder: 1 },
-      { title: 'Reconhecimento de Intervalos', description: 'Distâncias', content: 'Ouvindo intervalos.', xpReward: 50, sortOrder: 2 },
-      { title: 'Reconhecimento de Escalas', description: 'Cores musicais', content: 'Maior x Menor.', xpReward: 50, sortOrder: 3 },
-      { title: 'Reconhecimento de Acordes', description: 'Tríades', content: 'Ouvindo tríades.', xpReward: 50, sortOrder: 4 },
-      { title: 'Reconhecimento de Progressões', description: 'Sequências', content: 'Ouvindo o movimento harmônico.', xpReward: 50, sortOrder: 5 },
-      { title: 'Avaliação Final', description: 'Teste seu dominio', content: 'A prova final da jornada.', xpReward: 100, sortOrder: 6 },
+      {
+        title: 'Reconhecimento de Notas',
+        description: 'Ouvido absoluto e relativo',
+        content: lessonContent({
+          Objetivo: 'Começar a associar sons a nomes de notas.',
+          Conceito: 'Treino auditivo transforma teoria em escuta. No começo, o objetivo nao e ter ouvido perfeito, mas criar referencias.',
+          Analogia: 'E como reconhecer vozes de pessoas conhecidas. Com repetição, o ouvido cria memoria.',
+          'Exemplo visual': ['Ouvir C', 'Comparar com D', 'Escolher a opcao mais provavel'],
+          'Exercicio guiado': 'Toque o audio simulado, escolha uma opcao e leia o feedback.',
+          Desafio: 'Nao chute rapido. Ouça, compare e responda.',
+          Resumo: ['Ouvido melhora com repetição.', 'Comparar e mais importante que adivinhar.', 'Notas viram referencias internas.'],
+        }),
+        xpReward: 50,
+        sortOrder: 1,
+      },
+      {
+        title: 'Reconhecimento de Intervalos',
+        description: 'Distâncias',
+        content: lessonContent({
+          Objetivo: 'Perceber intervalos como distancias sonoras.',
+          Conceito: 'Intervalos nao sao apenas contagem no papel. Eles possuem sensacao auditiva: segunda soa proxima, oitava soa como mesma nota em outra altura.',
+          Analogia: 'E como reconhecer o tamanho de um salto sem medir com regua.',
+          'Exemplo visual': ['C para D = perto', 'C para G = salto maior', 'C para C = oitava'],
+          'Exercicio guiado': 'Ao ouvir duas notas, pergunte se parecem vizinhas ou distantes.',
+          Desafio: 'Relacione a teoria de intervalos com a sensacao sonora.',
+          Resumo: ['Intervalos tem som proprio.', 'Ouvido relativo compara distancias.', 'Essa habilidade ajuda melodias e acordes.'],
+        }),
+        xpReward: 50,
+        sortOrder: 2,
+      },
+      {
+        title: 'Reconhecimento de Escalas',
+        description: 'Cores musicais',
+        content: lessonContent({
+          Objetivo: 'Diferenciar a sensacao geral de escalas.',
+          Conceito: 'Escalas criam cores. A escala maior costuma soar aberta e estavel; a menor costuma soar mais fechada ou introspectiva.',
+          Analogia: 'E como perceber se uma imagem esta clara ou sombria antes de identificar cada detalhe.',
+          'Exemplo visual': ['Maior: sensacao aberta', 'Menor: sensacao mais fechada', 'Relativas compartilham notas, mas mudam centro.'],
+          'Exercicio guiado': 'Ouça e pergunte: essa sequencia parece repousar em um centro maior ou menor?',
+          Desafio: 'Compare C maior e A menor lembrando que usam as mesmas notas.',
+          Resumo: ['Escalas tem cor.', 'Centro tonal muda a sensacao.', 'Maior/menor e uma primeira classificacao util.'],
+        }),
+        xpReward: 50,
+        sortOrder: 3,
+      },
+      {
+        title: 'Reconhecimento de Acordes',
+        description: 'Tríades',
+        content: lessonContent({
+          Objetivo: 'Reconhecer diferenças de cor entre acordes maiores, menores, diminutos e aumentados.',
+          Conceito: 'Acordes possuem identidade auditiva. Maior e menor diferem pela terça; diminuto e aumentado mudam a quinta e criam mais tensão.',
+          Analogia: 'E como reconhecer sabores: doce, amargo, acido. Cada acorde tem uma cor.',
+          'Exemplo visual': ['Maior: 1 3 5', 'Menor: 1 b3 5', 'Diminuto: 1 b3 b5', 'Aumentado: 1 3 #5'],
+          'Exercicio guiado': 'Compare C maior com C menor: a nota do meio muda a sensacao.',
+          Desafio: 'Ao ouvir um acorde, pergunte primeiro: parece maior ou menor?',
+          Resumo: ['Acordes tem cor auditiva.', 'Terça define maior/menor.', 'Quinta alterada cria tensão.', 'Ouvir acordes ajuda a tirar musicas.'],
+        }),
+        xpReward: 50,
+        sortOrder: 4,
+      },
+      {
+        title: 'Reconhecimento de Progressões',
+        description: 'Sequências',
+        content: lessonContent({
+          Objetivo: 'Ouvir movimento harmonico como saida, tensão e retorno.',
+          Conceito: 'Progressões contam uma pequena historia. I soa como casa, IV afasta, V cria retorno, vi muda a cor.',
+          Analogia: 'E como uma cena: inicio, conflito e resolução.',
+          'Exemplo visual': ['I-IV-V-I = casa, saida, tensão, casa', 'I-V-vi-IV = progressao pop comum', 'ii-V-I = retorno forte'],
+          'Exercicio guiado': 'Leia C F G C e imagine repouso, afastamento, tensão e retorno.',
+          Desafio: 'Tente reconhecer quando uma progressao parece voltar para casa.',
+          Resumo: ['Progressões tem movimento.', 'Funções harmonicas ajudam a ouvir esse movimento.', 'Reconhecer progressões conecta teoria a musicas reais.'],
+        }),
+        xpReward: 50,
+        sortOrder: 5,
+      },
+      {
+        title: 'Avaliação Final',
+        description: 'Teste seu dominio',
+        content: lessonContent({
+          Objetivo: 'Revisar notas, intervalos, escalas, acordes e progressões pelo ouvido.',
+          Conceito: 'Treino auditivo fecha a jornada inicial porque transforma conhecimento visual em percepção sonora.',
+          'Antes de comecar': ['Ouça antes de responder.', 'Compare opções.', 'Use teoria como pista.', 'Erros mostram o que treinar mais.'],
+          Desafio: 'Responda com calma e leia o feedback de cada questao.',
+          Resumo: ['Ouvido e treino, nao dom magico.', 'Teoria orienta a escuta.', 'Escuta melhora prática musical real.', 'A jornada agora prepara instrumento com base solida.'],
+        }),
+        xpReward: 100,
+        sortOrder: 6,
+      },
     ];
 
     for (const lesson of module8Lessons) {
@@ -1550,7 +2166,64 @@ async function seed() {
         lessonOrder: 1,
         type: 'audio_recognition',
         prompt: 'Qual nota está tocando?',
-        payload: { audio: 'note_C4.mp3', options: ['C', 'D', 'E', 'F'], correctAnswer: 'C' },
+        payload: {
+          audio: 'note_C4.mp3',
+          options: ['C', 'D', 'E', 'F'],
+          correctAnswer: 'C',
+          feedback: 'A referencia simulada e C. Use este ponto como casa para comparar outras notas.',
+        },
+      },
+      {
+        lessonOrder: 2,
+        type: 'multiple_choice',
+        prompt: 'Qual intervalo costuma soar como a mesma nota em outra altura?',
+        payload: {
+          options: ['Oitava', 'Segunda', 'Terça menor', 'Sétima'],
+          correctAnswer: 'Oitava',
+          feedback: 'A oitava repete o nome da nota em outra altura, por isso soa muito relacionada.',
+        },
+      },
+      {
+        lessonOrder: 3,
+        type: 'audio_recognition',
+        prompt: 'A escala simulada soa maior ou menor?',
+        payload: {
+          audio: 'scale_major_C.mp3',
+          options: ['Maior', 'Menor', 'Diminuta', 'Aumentada'],
+          correctAnswer: 'Maior',
+          feedback: 'A escala maior costuma soar aberta e estavel.',
+        },
+      },
+      {
+        lessonOrder: 4,
+        type: 'audio_recognition',
+        prompt: 'Qual tipo de acorde está tocando?',
+        payload: {
+          audio: 'chord_C_major.mp3',
+          options: ['Maior', 'Menor', 'Diminuto', 'Aumentado'],
+          correctAnswer: 'Maior',
+          feedback: 'Acorde maior tem raiz, terça maior e quinta justa.',
+        },
+      },
+      {
+        lessonOrder: 5,
+        type: 'multiple_choice',
+        prompt: 'Em uma progressão, qual função cria maior vontade de voltar para casa?',
+        payload: {
+          options: ['Dominante', 'Tônica', 'Repouso final', 'Semibreve'],
+          correctAnswer: 'Dominante',
+          feedback: 'Dominante cria tensão e vontade de resolver na tônica.',
+        },
+      },
+      {
+        lessonOrder: 6,
+        type: 'multiple_choice',
+        prompt: 'Qual atitude melhora mais o treino auditivo?',
+        payload: {
+          options: ['Comparar sons com calma e repetir', 'Chutar rapidamente', 'Ignorar feedback', 'Estudar apenas leitura visual'],
+          correctAnswer: 'Comparar sons com calma e repetir',
+          feedback: 'Treino auditivo depende de comparação, repetição e atenção ao feedback.',
+        },
       },
     ];
 
