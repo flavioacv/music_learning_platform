@@ -83,6 +83,7 @@ class LearningRepository {
   Future<LessonCompletionResult> completeLesson(String lessonId) async {
     final response = await _apiClient.post(
       '/api/v1/progress/lessons/$lessonId/complete',
+      body: {},
     );
     return LessonCompletionResult.fromJson(
       response['data'] as Map<String, dynamic>,

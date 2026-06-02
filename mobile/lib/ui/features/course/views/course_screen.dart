@@ -24,8 +24,16 @@ class _CourseScreenState extends State<CourseScreen> {
     _modulesFuture = widget.learningRepository.getModules();
   }
 
+  Future<void> _reloadModules() {
+    final future = widget.learningRepository.getModules();
+    setState(() {
+      _modulesFuture = future;
+    });
+    return future;
+  }
+
   Future<void> _completeLesson(Lesson lesson) async {
-    await Navigator.push(
+    final didComplete = await Navigator.push<bool>(
       context,
       MaterialPageRoute(
         builder: (_) => ExerciseScreen(
@@ -34,9 +42,10 @@ class _CourseScreenState extends State<CourseScreen> {
         ),
       ),
     );
-    setState(() {
-      _modulesFuture = widget.learningRepository.getModules();
-    });
+
+    if (!mounted || didComplete != true) return;
+
+    await _reloadModules();
   }
 
   @override
@@ -61,39 +70,54 @@ class _CourseScreenState extends State<CourseScreen> {
 
           final modules = snapshot.data!;
 
-          return ListView(
-            padding: const EdgeInsets.all(24),
-            children: [
-              Text(
-                'Curso Base',
-                style: theme.textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.w900,
-                  color: theme.colorScheme.primary,
+          return RefreshIndicator(
+            onRefresh: _reloadModules,
+            child: ListView(
+              padding: const EdgeInsets.all(24),
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Curso Base',
+                        style: theme.textTheme.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.w900,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ).animate().fadeIn().slideX(begin: -0.1),
+                    ),
+                    IconButton.filledTonal(
+                      onPressed: _reloadModules,
+                      tooltip: 'Atualizar progresso',
+                      icon: const Icon(Icons.refresh),
+                    ),
+                  ],
                 ),
-              ).animate().fadeIn().slideX(begin: -0.1),
-              const SizedBox(height: 4),
-              Text(
-                'Da compreensao musical ate os primeiros acordes.',
-                style: theme.textTheme.bodyLarge,
-              ).animate().fadeIn(delay: 100.ms).slideX(begin: -0.1),
-              const SizedBox(height: 32),
-              ...modules.asMap().entries.map((entry) {
-                final index = entry.key;
-                final module = entry.value;
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child:
-                      _ModuleCard(
-                            module: module,
-                            onCompleteLesson: _completeLesson,
-                          )
-                          .animate()
-                          .fadeIn(delay: (200 + (index * 100)).ms)
-                          .slideY(begin: 0.1),
-                );
-              }),
-              const SizedBox(height: 40),
-            ],
+                const SizedBox(height: 4),
+                Text(
+                  'Da compreensao musical ate os primeiros acordes.',
+                  style: theme.textTheme.bodyLarge,
+                ).animate().fadeIn(delay: 100.ms).slideX(begin: -0.1),
+                const SizedBox(height: 32),
+                ...modules.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final module = entry.value;
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child:
+                        _ModuleCard(
+                              module: module,
+                              onCompleteLesson: _completeLesson,
+                            )
+                            .animate()
+                            .fadeIn(delay: (200 + (index * 100)).ms)
+                            .slideY(begin: 0.1),
+                  );
+                }),
+                const SizedBox(height: 40),
+              ],
+            ),
           );
         },
       ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../../../data/repositories/learning_repository.dart';
+import '../../../../data/services/api_client.dart';
 import '../../../../domain/models/course_models.dart';
 import '../../../../domain/models/progress_models.dart';
 import '../../../core/responsive_content.dart';
@@ -33,6 +34,7 @@ class ExerciseScreen extends StatefulWidget {
 class _ExerciseScreenState extends State<ExerciseScreen> {
   late final ExerciseViewModel _viewModel;
   late bool _showTheory;
+  bool _isCompleting = false;
 
   @override
   void initState() {
@@ -48,6 +50,12 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
   }
 
   Future<void> _completeAndPop() async {
+    if (_isCompleting) return;
+
+    setState(() {
+      _isCompleting = true;
+    });
+
     try {
       final result = await widget.repository.completeLesson(widget.lesson.id);
       if (mounted && (result.leveledUp || result.newAchievements.isNotEmpty)) {
@@ -57,11 +65,37 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
           builder: (context) => _GamificationDialog(result: result),
         );
       }
-    } catch (e) {
-      // Ignore error for now
+      if (mounted) {
+        Navigator.of(context).pop(true);
+      }
+    } on ApiException catch (error) {
+      _showCompletionError(error.message);
+    } catch (_) {
+      _showCompletionError('Nao foi possivel salvar seu progresso.');
     }
-    if (mounted) {
-      Navigator.of(context).pop();
+  }
+
+  void _showCompletionError(String message) {
+    if (!mounted) return;
+
+    setState(() {
+      _isCompleting = false;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        action: SnackBarAction(
+          label: 'Tentar de novo',
+          onPressed: _completeAndPop,
+        ),
+      ),
+    );
+  }
+
+  void _closeWithoutCompletion() {
+    if (!_isCompleting) {
+      Navigator.of(context).pop(false);
     }
   }
 
@@ -80,7 +114,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
         title: const Text('Prática'),
         leading: IconButton(
           icon: const Icon(Icons.close),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: _closeWithoutCompletion,
         ),
       ),
       body: ListenableBuilder(
@@ -143,6 +177,8 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                   Center(
                     child: FilledButton.icon(
                       onPressed: () {
+                        if (_isCompleting) return;
+
                         if (_viewModel.questionCount == 0) {
                           _completeAndPop();
                         } else {
@@ -155,12 +191,16 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                         minimumSize: const Size(200, 56),
                       ),
                       icon: Icon(
-                        _viewModel.questionCount == 0
+                        _isCompleting
+                            ? Icons.hourglass_top
+                            : _viewModel.questionCount == 0
                             ? Icons.check_circle
                             : Icons.arrow_forward,
                       ),
                       label: Text(
-                        _viewModel.questionCount == 0
+                        _isCompleting
+                            ? 'Salvando progresso...'
+                            : _viewModel.questionCount == 0
                             ? 'Concluir Lição'
                             : 'Começar Exercícios',
                         style: const TextStyle(fontSize: 18),
@@ -178,6 +218,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
               child: _LessonResultView(
                 viewModel: _viewModel,
                 onComplete: _completeAndPop,
+                isCompleting: _isCompleting,
               ),
             );
           }
@@ -196,8 +237,12 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                   const Text('Nenhum exercicio para esta licao.'),
                   const SizedBox(height: 24),
                   FilledButton(
-                    onPressed: _completeAndPop,
-                    child: const Text('Concluir licao'),
+                    onPressed: _isCompleting ? null : _completeAndPop,
+                    child: Text(
+                      _isCompleting
+                          ? 'Salvando progresso...'
+                          : 'Concluir licao',
+                    ),
                   ),
                 ],
               ),
@@ -215,10 +260,15 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
 }
 
 class _LessonResultView extends StatelessWidget {
-  const _LessonResultView({required this.viewModel, required this.onComplete});
+  const _LessonResultView({
+    required this.viewModel,
+    required this.onComplete,
+    required this.isCompleting,
+  });
 
   final ExerciseViewModel viewModel;
   final Future<void> Function() onComplete;
+  final bool isCompleting;
 
   @override
   Widget build(BuildContext context) {
@@ -290,9 +340,11 @@ class _LessonResultView extends StatelessWidget {
         const SizedBox(height: 32),
         if (passed)
           FilledButton.icon(
-            onPressed: onComplete,
-            icon: const Icon(Icons.check_circle),
-            label: const Text('Concluir e ganhar XP'),
+            onPressed: isCompleting ? null : onComplete,
+            icon: Icon(isCompleting ? Icons.hourglass_top : Icons.check_circle),
+            label: Text(
+              isCompleting ? 'Salvando progresso...' : 'Concluir e ganhar XP',
+            ),
           )
         else
           FilledButton.icon(
@@ -303,7 +355,9 @@ class _LessonResultView extends StatelessWidget {
         const SizedBox(height: 12),
         if (!passed)
           OutlinedButton.icon(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: isCompleting
+                ? null
+                : () => Navigator.of(context).pop(false),
             icon: const Icon(Icons.close),
             label: const Text('Sair sem concluir'),
           ),
