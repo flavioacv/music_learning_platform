@@ -286,13 +286,12 @@ class _LessonTileState extends State<_LessonTile> {
             vertical: 4,
           ),
           enabled: !isLocked,
-          onTap: isCompleted ? null : () => widget.onComplete(widget.lesson),
+          onTap: isLocked ? null : () => widget.onComplete(widget.lesson),
           leading: Icon(icon, color: color, size: 28),
           title: Text(
             widget.lesson.title,
             style: TextStyle(
               fontWeight: isCompleted ? FontWeight.w600 : FontWeight.w800,
-              decoration: isCompleted ? TextDecoration.lineThrough : null,
               color: isLocked
                   ? theme.colorScheme.onSurfaceVariant
                   : theme.colorScheme.onSurface,
@@ -318,7 +317,7 @@ class _LessonTileState extends State<_LessonTile> {
               ),
             ),
             child: Text(
-              '+${widget.lesson.xp} XP',
+              isCompleted ? 'Revisar' : '+${widget.lesson.xp} XP',
               style: TextStyle(
                 color: isLocked
                     ? theme.colorScheme.onSurfaceVariant.withOpacity(0.5)

@@ -58,14 +58,18 @@ class ProgressAchievement {
 
 class LessonCompletionResult {
   const LessonCompletionResult({
+    required this.xpAwarded,
     required this.leveledUp,
     required this.newLevel,
     required this.newAchievements,
+    required this.alreadyCompleted,
   });
 
+  final int xpAwarded;
   final bool leveledUp;
   final int newLevel;
   final List<ProgressAchievement> newAchievements;
+  final bool alreadyCompleted;
 
   factory LessonCompletionResult.fromJson(Map<String, dynamic> json) {
     final achievements = (json['newAchievements'] as List<dynamic>? ?? [])
@@ -74,9 +78,11 @@ class LessonCompletionResult {
         .toList();
 
     return LessonCompletionResult(
+      xpAwarded: json['xpAwarded'] as int? ?? 0,
       leveledUp: json['leveledUp'] as bool? ?? false,
       newLevel: json['newLevel'] as int? ?? 1,
       newAchievements: achievements,
+      alreadyCompleted: json['alreadyCompleted'] as bool? ?? false,
     );
   }
 }

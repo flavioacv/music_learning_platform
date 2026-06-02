@@ -36,6 +36,8 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
   late bool _showTheory;
   bool _isCompleting = false;
 
+  bool get _isReview => widget.lesson.status == LessonStatus.completed;
+
   @override
   void initState() {
     super.initState();
@@ -201,7 +203,9 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                         _isCompleting
                             ? 'Salvando progresso...'
                             : _viewModel.questionCount == 0
-                            ? 'Concluir Lição'
+                            ? (_isReview
+                                  ? 'Finalizar revisão'
+                                  : 'Concluir Lição')
                             : 'Começar Exercícios',
                         style: const TextStyle(fontSize: 18),
                       ),
@@ -219,6 +223,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                 viewModel: _viewModel,
                 onComplete: _completeAndPop,
                 isCompleting: _isCompleting,
+                isReview: _isReview,
               ),
             );
           }
@@ -241,6 +246,8 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                     child: Text(
                       _isCompleting
                           ? 'Salvando progresso...'
+                          : _isReview
+                          ? 'Finalizar revisão'
                           : 'Concluir licao',
                     ),
                   ),
@@ -264,11 +271,13 @@ class _LessonResultView extends StatelessWidget {
     required this.viewModel,
     required this.onComplete,
     required this.isCompleting,
+    required this.isReview,
   });
 
   final ExerciseViewModel viewModel;
   final Future<void> Function() onComplete;
   final bool isCompleting;
+  final bool isReview;
 
   @override
   Widget build(BuildContext context) {
@@ -331,7 +340,9 @@ class _LessonResultView extends StatelessWidget {
           ),
           child: Text(
             passed
-                ? 'Você atingiu a meta mínima de 80%. A lição será concluída e a próxima etapa será desbloqueada.'
+                ? isReview
+                      ? 'Revisão concluída. O treino ajuda a fixar o conteúdo, mas XP só é concedido na primeira conclusão.'
+                      : 'Você atingiu a meta mínima de 80%. A lição será concluída e a próxima etapa será desbloqueada.'
                 : 'A meta mínima é 80%. Revise o feedback das questões e tente de novo para ganhar XP e desbloquear a próxima aula.',
             textAlign: TextAlign.center,
             style: theme.textTheme.bodyLarge?.copyWith(height: 1.45),
@@ -343,7 +354,11 @@ class _LessonResultView extends StatelessWidget {
             onPressed: isCompleting ? null : onComplete,
             icon: Icon(isCompleting ? Icons.hourglass_top : Icons.check_circle),
             label: Text(
-              isCompleting ? 'Salvando progresso...' : 'Concluir e ganhar XP',
+              isCompleting
+                  ? 'Salvando progresso...'
+                  : isReview
+                  ? 'Finalizar revisão'
+                  : 'Concluir e ganhar XP',
             ),
           )
         else

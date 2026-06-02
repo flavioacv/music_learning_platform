@@ -24,9 +24,9 @@ export async function progressRoutes(app: FastifyInstance) {
     const result = await completeLesson(authUser.sub, params.lessonId);
 
     if (!result) {
-      throw notFound('Lesson not found or already completed', 'lesson_not_found');
+      throw notFound('Lesson not found', 'lesson_not_found');
     }
 
-    return reply.code(201).send(success(result));
+    return reply.code(result.alreadyCompleted ? 200 : 201).send(success(result));
   });
 }

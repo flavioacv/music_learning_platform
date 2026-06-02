@@ -68,7 +68,10 @@ export async function completeLesson(userId: string, lessonId: string) {
       'SELECT title, xp_reward FROM lessons WHERE id = $1',
       [lessonId]
     );
-    if (lessonRes.rowCount === 0) throw new Error('Lesson not found');
+    if (lessonRes.rowCount === 0) {
+      await client.query('ROLLBACK');
+      return null;
+    }
     const lesson = lessonRes.rows[0];
 
     const insertRes = await client.query(
@@ -80,8 +83,22 @@ export async function completeLesson(userId: string, lessonId: string) {
     );
 
     if (insertRes.rowCount === 0) {
+      const existingProgress = await client.query<{ completed_at: string }>(
+        `SELECT completed_at
+         FROM user_lesson_progress
+         WHERE user_id = $1 AND lesson_id = $2`,
+        [userId, lessonId],
+      );
       await client.query('ROLLBACK');
-      return null;
+      return {
+        lessonId,
+        xpAwarded: 0,
+        completedAt: existingProgress.rows[0]?.completed_at ?? null,
+        leveledUp: false,
+        newLevel: level,
+        newAchievements: [],
+        alreadyCompleted: true,
+      };
     }
 
     const completedAt = insertRes.rows[0].completed_at;
@@ -149,6 +166,7 @@ export async function completeLesson(userId: string, lessonId: string) {
       leveledUp,
       newLevel: level,
       newAchievements,
+      alreadyCompleted: false,
     };
   } catch (error) {
     await client.query('ROLLBACK');
