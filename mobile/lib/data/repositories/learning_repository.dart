@@ -42,7 +42,9 @@ class LearningRepository {
               .map((lesson) {
                 final status = lessonCursor < completedCount
                     ? LessonStatus.completed
-                    : LessonStatus.available;
+                    : lessonCursor == completedCount
+                    ? LessonStatus.available
+                    : LessonStatus.locked;
                 lessonCursor += 1;
 
                 return Lesson(
@@ -79,8 +81,12 @@ class LearningRepository {
   }
 
   Future<LessonCompletionResult> completeLesson(String lessonId) async {
-    final response = await _apiClient.post('/api/v1/progress/lessons/$lessonId/complete');
-    return LessonCompletionResult.fromJson(response['data'] as Map<String, dynamic>);
+    final response = await _apiClient.post(
+      '/api/v1/progress/lessons/$lessonId/complete',
+    );
+    return LessonCompletionResult.fromJson(
+      response['data'] as Map<String, dynamic>,
+    );
   }
 
   List<Achievement> get achievements => const [
@@ -105,13 +111,27 @@ class LearningRepository {
   ];
 
   IconData _iconForModule(String title) {
-    return switch (title) {
-      'Notas musicais' => Icons.music_note,
-      'Acidentes musicais' => Icons.tag,
-      'Escalas' => Icons.linear_scale,
-      'Intervalos' => Icons.swap_horiz,
-      'Formacao de acordes' => Icons.piano,
-      'Campo harmonico' => Icons.account_tree,
+    final normalized = title
+        .toLowerCase()
+        .replaceAll('á', 'a')
+        .replaceAll('ã', 'a')
+        .replaceAll('â', 'a')
+        .replaceAll('é', 'e')
+        .replaceAll('ê', 'e')
+        .replaceAll('í', 'i')
+        .replaceAll('ó', 'o')
+        .replaceAll('ô', 'o')
+        .replaceAll('ú', 'u');
+
+    return switch (normalized) {
+      'notas musicais' => Icons.music_note,
+      'ritmo' => Icons.timer,
+      'escalas' => Icons.linear_scale,
+      'intervalos' => Icons.swap_horiz,
+      'acordes' => Icons.piano,
+      'campo harmonico' => Icons.account_tree,
+      'aplicacao musical' => Icons.library_music,
+      'treino auditivo' => Icons.hearing,
       _ => Icons.school,
     };
   }

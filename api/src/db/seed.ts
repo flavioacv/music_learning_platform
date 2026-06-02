@@ -1,5 +1,25 @@
 import { pool } from './pool.js';
 
+type SeedLesson = {
+  title: string;
+  description: string;
+  content: string;
+  xpReward: number;
+  sortOrder: number;
+};
+
+function lessonContent(sections: Record<string, string | string[]>) {
+  return Object.entries(sections)
+    .map(([title, value]) => {
+      const body = Array.isArray(value)
+        ? value.map((item) => `- ${item}`).join('\n')
+        : value;
+
+      return `## ${title}\n${body}`;
+    })
+    .join('\n\n');
+}
+
 async function seed() {
   const client = await pool.connect();
   
@@ -35,47 +55,256 @@ async function seed() {
     const module1Id = module1Res.rows[0].id;
 
     console.log('Inserindo Aulas do Módulo 1...');
-    await client.query(`
-      INSERT INTO lessons (module_id, title, description, content, xp_reward, sort_order) VALUES 
-      ($1, 'O que e uma nota musical', 'O inicio de tudo.', 'A musica e construida a partir de notas. Existem 7 notas naturais. Imagine as notas como as cores primarias da musica.', 10, 1),
-      ($1, 'As 7 notas naturais', 'Do Re Mi Fa Sol La Si', 'A sequencia padrao que todos conhecem: Do, Re, Mi, Fa, Sol, La, Si.', 10, 2),
-      ($1, 'Notacao Americana', 'A linguagem global', 'Na musica internacional, usamos letras. C=Do, D=Re, E=Mi, F=Fa, G=Sol, A=La, B=Si.', 10, 3),
-      ($1, 'Sustenidos (#)', 'Aumentando o tom', 'O sustenido (#) aumenta a nota em meio tom. Exemplo: C vira C#.', 10, 4),
-      ($1, 'Bemois (b)', 'Abaixando o tom', 'O bemol (b) abaixa a nota em meio tom. Exemplo: D vira Db.', 10, 5),
-      ($1, 'Enarmonia', 'Nomes diferentes, mesmo som', 'Notas com nomes diferentes mas que representam o mesmo som, como C# e Db.', 10, 6),
-      ($1, 'Localizando notas', 'Encontrando os sons', 'Saber mapear mentalmente e fisicamente as notas antes de tocar.', 10, 7),
-      ($1, 'Desafio de notas', 'Teste seus reflexos', 'Reconheca notas aleatorias em menos de 3 segundos.', 50, 8),
-      ($1, 'Avaliacao do Modulo 1', 'Teste seu dominio', 'Responda as questoes finais para garantir seus 100 XP e desbloquear o Modulo 2.', 100, 9)
-    `, [module1Id]);
+    const module1Lessons: SeedLesson[] = [
+      {
+        title: 'O que e uma nota musical',
+        description: 'Entenda a menor ideia musical que conseguimos nomear.',
+        content: lessonContent({
+          Objetivo: 'Ao final desta aula voce deve conseguir explicar, com suas palavras, que uma nota e um som com nome e lugar dentro da musica.',
+          Conceito: 'Uma nota musical e como um ponto de referencia sonoro. Quando damos nome a um som, conseguimos lembrar dele, comparar com outros sons e combina-lo para criar melodias, escalas e acordes.',
+          Analogia: 'Pense em uma nota como uma cor. Uma cor sozinha ja tem identidade. Quando combinamos varias cores, criamos desenhos. Na musica, combinamos notas para criar frases, climas e movimentos.',
+          'Exemplo visual': ['Dó, Ré, Mi, Fá, Sol, Lá e Si sao os nomes naturais mais usados no Brasil.', 'C, D, E, F, G, A e B sao os nomes por letras usados em cifras.', 'A mesma nota pode aparecer em alturas diferentes, como uma voz grave e uma voz aguda cantando Dó.'],
+          'Exercicio guiado': 'Leia em voz alta: Dó, Ré, Mi, Fá, Sol, Lá, Si. Agora leia de tras para frente. A ideia nao e decorar perfeitamente ainda, e sim perceber que existe uma ordem.',
+          Desafio: 'Escolha uma musica que voce conhece e tente cantar uma unica silaba parada. Esse som parado pode ser pensado como uma nota.',
+          Resumo: ['Notas sao nomes para sons musicais.', 'Elas ajudam a organizar o que ouvimos.', 'A plataforma vai usar notas antes de instrumento para construir compreensao.', 'Toda escala e todo acorde nasce de notas.'],
+        }),
+        xpReward: 10,
+        sortOrder: 1,
+      },
+      {
+        title: 'As 7 notas naturais',
+        description: 'A sequencia Do Re Mi Fa Sol La Si.',
+        content: lessonContent({
+          Objetivo: 'Reconhecer a ordem das 7 notas naturais e entender que ela se repete em ciclos.',
+          Conceito: 'As notas naturais sao Dó, Ré, Mi, Fá, Sol, Lá e Si. Depois de Si, a sequencia volta para Dó, so que em uma regiao mais aguda.',
+          Analogia: 'E parecido com os dias da semana. Depois de domingo, volta segunda. Na musica, depois de Si, volta Dó.',
+          'Exemplo visual': ['Dó -> Ré -> Mi -> Fá -> Sol -> Lá -> Si -> Dó', 'Subindo significa caminhar para sons mais agudos.', 'Descendo significa caminhar para sons mais graves.'],
+          'Exercicio guiado': 'Complete mentalmente: Dó, Ré, Mi, __. A resposta e Fá. Agora tente: Sol, Lá, __. A resposta e Si.',
+          Desafio: 'Fale a sequencia completa sem olhar. Depois fale de tras para frente: Si, Lá, Sol, Fá, Mi, Ré, Dó.',
+          Resumo: ['Existem 7 notas naturais.', 'A ordem se repete em ciclos.', 'Saber a ordem ajuda em escalas, intervalos e acordes.', 'Nao pule esta base: ela economiza muito esforco depois.'],
+        }),
+        xpReward: 10,
+        sortOrder: 2,
+      },
+      {
+        title: 'Notacao Americana',
+        description: 'A linguagem global das cifras.',
+        content: lessonContent({
+          Objetivo: 'Converter rapidamente notas brasileiras para letras usadas em cifras.',
+          Conceito: 'Em cifras, as notas sao escritas com letras: C=Dó, D=Ré, E=Mi, F=Fá, G=Sol, A=Lá, B=Si.',
+          Analogia: 'E como aprender que uma mesma cidade pode ter apelido. Dó e o nome que falamos; C e o nome usado em mapas de cifras, apps e materiais internacionais.',
+          'Exemplo visual': ['Dó = C', 'Ré = D', 'Mi = E', 'Fá = F', 'Sol = G', 'Lá = A', 'Si = B'],
+          'Exercicio guiado': 'Quando voce vir G em uma cifra, leia Sol. Quando vir A, leia Lá. Quando vir C, leia Dó.',
+          Desafio: 'Traduza esta sequencia: C G A F. Resposta esperada: Dó, Sol, Lá, Fá.',
+          Resumo: ['Cifra americana usa letras.', 'C nao e a primeira letra musical por acaso: ela representa Dó.', 'Ler letras prepara voce para acordes como C, G, Am e F.', 'Este e um dos conhecimentos mais usados por iniciantes.'],
+        }),
+        xpReward: 10,
+        sortOrder: 3,
+      },
+      {
+        title: 'Sustenidos (#)',
+        description: 'Como subir uma nota em meio tom.',
+        content: lessonContent({
+          Objetivo: 'Entender que o sustenido aproxima uma nota da proxima nota, subindo meio tom.',
+          Conceito: 'O simbolo # significa sustenido. Ele aumenta a nota em meio tom. C# e um som um pouco acima de C e antes de D.',
+          Analogia: 'Imagine uma escada com degraus pequenos entre algumas notas. O sustenido e dar um pequeno passo para cima.',
+          'Exemplo visual': ['C -> C# -> D', 'F -> F# -> G', 'G -> G# -> A'],
+          'Exercicio guiado': 'Se C# vem logo depois de C, entao F# vem logo depois de F. O nome da nota continua, mas recebe o #.',
+          Desafio: 'Qual e o sustenido de G? Resposta: G#.',
+          Resumo: ['# sobe meio tom.', 'C# fica entre C e D.', 'Sustenidos aparecem muito em escalas maiores.', 'Nao confunda subir com tocar mais forte: aqui falamos de altura sonora.'],
+        }),
+        xpReward: 10,
+        sortOrder: 4,
+      },
+      {
+        title: 'Bemois (b)',
+        description: 'Como descer uma nota em meio tom.',
+        content: lessonContent({
+          Objetivo: 'Entender que o bemol abaixa uma nota em meio tom.',
+          Conceito: 'O simbolo b significa bemol. Ele diminui a nota em meio tom. Db e um som um pouco abaixo de D e antes de C.',
+          Analogia: 'Se sustenido e um pequeno passo para cima, bemol e um pequeno passo para baixo.',
+          'Exemplo visual': ['D -> Db -> C', 'G -> Gb -> F', 'A -> Ab -> G'],
+          'Exercicio guiado': 'Se Db e D descendo meio tom, entao Eb e E descendo meio tom.',
+          Desafio: 'Qual e o bemol de B? Resposta: Bb.',
+          Resumo: ['b desce meio tom.', 'Db fica entre C e D.', 'Bemois aparecem em cifras e tonalidades.', 'Sustenido e bemol descrevem direcoes opostas.'],
+        }),
+        xpReward: 10,
+        sortOrder: 5,
+      },
+      {
+        title: 'Enarmonia',
+        description: 'Nomes diferentes para o mesmo som.',
+        content: lessonContent({
+          Objetivo: 'Perceber que algumas notas possuem dois nomes corretos dependendo do contexto.',
+          Conceito: 'Enarmonia acontece quando dois nomes apontam para o mesmo som. C# e Db sao o exemplo mais comum: um nome olha a nota subindo, o outro olha descendo.',
+          Analogia: 'E como chamar uma pessoa pelo nome ou pelo apelido. O nome muda, mas a pessoa e a mesma.',
+          'Exemplo visual': ['C# = Db', 'D# = Eb', 'F# = Gb', 'G# = Ab', 'A# = Bb'],
+          'Exercicio guiado': 'Se C# esta entre C e D, Db tambem esta entre C e D. Por isso eles podem representar o mesmo som.',
+          Desafio: 'Qual e o outro nome de F#? Resposta: Gb.',
+          Resumo: ['Enarmonia e mesmo som com nomes diferentes.', 'O contexto musical decide o melhor nome.', 'Esta ideia evita confusao quando aparecerem escalas com sustenidos ou bemois.', 'No inicio, memorize pares comuns como C#/Db e F#/Gb.'],
+        }),
+        xpReward: 10,
+        sortOrder: 6,
+      },
+      {
+        title: 'Localizando notas',
+        description: 'Encontrando os sons antes de tocar.',
+        content: lessonContent({
+          Objetivo: 'Criar um mapa mental das notas para preparar o uso de instrumentos virtuais e reais.',
+          Conceito: 'Localizar notas significa saber onde elas aparecem em uma sequencia musical. Antes de decorar um instrumento, voce aprende a enxergar caminhos entre notas.',
+          Analogia: 'Antes de dirigir por uma cidade, ajuda conhecer o mapa. Na musica, as notas sao pontos desse mapa.',
+          'Exemplo visual': ['C fica antes de D.', 'E fica antes de F.', 'B volta para C no novo ciclo.'],
+          'Exercicio guiado': 'Comece em C e avance: C, D, E, F. Agora comece em G e avance: G, A, B, C.',
+          Desafio: 'Sem olhar, diga qual nota vem depois de B. Resposta: C.',
+          Resumo: ['Notas se repetem em ciclos.', 'Localizar e mais importante que decorar isoladamente.', 'Esse mapa sera usado em escalas e acordes.', 'O objetivo e velocidade com compreensao.'],
+        }),
+        xpReward: 10,
+        sortOrder: 7,
+      },
+      {
+        title: 'Desafio de notas',
+        description: 'Teste seus reflexos musicais.',
+        content: lessonContent({
+          Objetivo: 'Responder notas naturais, letras e acidentes com menos hesitacao.',
+          Conceito: 'A fluencia vem de repeticao curta e variada. Neste desafio, voce alterna entre nomes brasileiros, letras e acidentes.',
+          Analogia: 'E como treinar tabuada: primeiro voce entende, depois pratica ate responder sem travar.',
+          'Exercicio guiado': 'Leia C e diga Dó. Leia Sol e diga G. Leia C# e pense: C subiu meio tom.',
+          Desafio: 'Tente acertar todas as perguntas da pratica sem consultar a tabela.',
+          Resumo: ['Rapidez ajuda, mas precisao vem primeiro.', 'Use erros como pistas do que revisar.', 'Notas, letras e acidentes formam a base da leitura musical.'],
+        }),
+        xpReward: 50,
+        sortOrder: 8,
+      },
+      {
+        title: 'Avaliacao do Modulo 1',
+        description: 'Mostre que domina o alfabeto musical.',
+        content: lessonContent({
+          Objetivo: 'Validar se voce consegue reconhecer notas naturais, cifras, sustenidos, bemois e enarmonias.',
+          Conceito: 'A avaliacao mistura os conceitos do modulo para confirmar se eles funcionam juntos.',
+          'Antes de comecar': ['Revise a ordem: Dó, Ré, Mi, Fá, Sol, Lá, Si.', 'Revise a cifra: C, D, E, F, G, A, B.', 'Lembre: # sobe meio tom e b desce meio tom.'],
+          Desafio: 'Passe pela avaliacao com pelo menos 80% de acerto para seguir para ritmo.',
+          Resumo: ['Este modulo ensina o alfabeto da musica.', 'Sem notas, escalas e acordes viram decoreba.', 'Com notas claras, o resto da jornada fica mais leve.'],
+        }),
+        xpReward: 100,
+        sortOrder: 9,
+      },
+    ];
 
-    // Exercícios Módulo 1 (associando com a aula 3 que tem sort_order = 3 e aula 4 que tem sort_order = 4)
-    const lessonsMod1Res = await client.query(`SELECT id, sort_order FROM lessons WHERE module_id = $1 ORDER BY sort_order`, [module1Id]);
-    const lesson3Id = lessonsMod1Res.rows.find(l => l.sort_order === 3).id;
-    const lesson4Id = lessonsMod1Res.rows.find(l => l.sort_order === 4).id;
+    for (const lesson of module1Lessons) {
+      await client.query(
+        `
+          INSERT INTO lessons (module_id, title, description, content, xp_reward, sort_order)
+          VALUES ($1, $2, $3, $4, $5, $6)
+        `,
+        [module1Id, lesson.title, lesson.description, lesson.content, lesson.xpReward, lesson.sortOrder],
+      );
+    }
 
-    await client.query(`
-      INSERT INTO exercises (lesson_id, type, prompt, payload, xp_reward, sort_order)
-      VALUES ($1, 'multiple_choice', 'Qual nota corresponde a letra G?', $2, 20, 1)
-    `, [lesson3Id, JSON.stringify({
-      options: ['Do', 'Sol', 'La', 'Mi'],
-      correctAnswer: 'Sol'
-    })]);
+    const lessonsMod1Res = await client.query<{ id: string; sort_order: number }>(
+      `SELECT id, sort_order FROM lessons WHERE module_id = $1 ORDER BY sort_order`,
+      [module1Id],
+    );
+    const lessonIdByOrder = new Map(lessonsMod1Res.rows.map((lesson) => [lesson.sort_order, lesson.id]));
 
-    await client.query(`
-      INSERT INTO exercises (lesson_id, type, prompt, payload, xp_reward, sort_order)
-      VALUES ($1, 'fill_blank', 'A nota americana para Do e _____', $2, 20, 2)
-    `, [lesson3Id, JSON.stringify({
-      sentence: 'A nota americana para Do e _____',
-      answer: 'C'
-    })]);
+    const module1Exercises = [
+      {
+        lessonOrder: 1,
+        type: 'multiple_choice',
+        prompt: 'O que e uma nota musical?',
+        payload: { options: ['Um som com nome musical', 'Um tipo de instrumento', 'Uma velocidade de musica', 'Uma batida forte'], correctAnswer: 'Um som com nome musical' },
+      },
+      {
+        lessonOrder: 1,
+        type: 'fill_blank',
+        prompt: 'Uma nota ajuda a dar _____ para um som.',
+        payload: { sentence: 'Uma nota ajuda a dar _____ para um som.', answer: 'nome' },
+      },
+      {
+        lessonOrder: 2,
+        type: 'multiple_choice',
+        prompt: 'Qual nota vem depois de Mi?',
+        payload: { options: ['Ré', 'Fá', 'Sol', 'Si'], correctAnswer: 'Fá' },
+      },
+      {
+        lessonOrder: 2,
+        type: 'fill_blank',
+        prompt: 'Depois de Si, a sequencia volta para _____.',
+        payload: { sentence: 'Depois de Si, a sequencia volta para _____.', answer: 'Do' },
+      },
+      {
+        lessonOrder: 3,
+        type: 'multiple_choice',
+        prompt: 'Qual nota corresponde a letra G?',
+        payload: { options: ['Do', 'Sol', 'La', 'Mi'], correctAnswer: 'Sol' },
+      },
+      {
+        lessonOrder: 3,
+        type: 'fill_blank',
+        prompt: 'A nota americana para Do e _____.',
+        payload: { sentence: 'A nota americana para Do e _____.', answer: 'C' },
+      },
+      {
+        lessonOrder: 3,
+        type: 'multiple_choice',
+        prompt: 'Qual letra representa a nota La?',
+        payload: { options: ['A', 'B', 'F', 'G'], correctAnswer: 'A' },
+      },
+      {
+        lessonOrder: 4,
+        type: 'multiple_choice',
+        prompt: 'Qual e o sustenido de C?',
+        payload: { options: ['C#', 'D#', 'Cb', 'Db'], correctAnswer: 'C#' },
+      },
+      {
+        lessonOrder: 4,
+        type: 'fill_blank',
+        prompt: 'O simbolo # sobe a nota em meio _____.',
+        payload: { sentence: 'O simbolo # sobe a nota em meio _____.', answer: 'tom' },
+      },
+      {
+        lessonOrder: 5,
+        type: 'multiple_choice',
+        prompt: 'Qual opcao mostra D descendo meio tom?',
+        payload: { options: ['D#', 'Db', 'E', 'F'], correctAnswer: 'Db' },
+      },
+      {
+        lessonOrder: 6,
+        type: 'multiple_choice',
+        prompt: 'Qual par representa enarmonia?',
+        payload: { options: ['C e D', 'C# e Db', 'E e G', 'A e B'], correctAnswer: 'C# e Db' },
+      },
+      {
+        lessonOrder: 7,
+        type: 'multiple_choice',
+        prompt: 'Qual nota vem depois de B na notacao americana?',
+        payload: { options: ['A', 'C', 'D', 'G'], correctAnswer: 'C' },
+      },
+      {
+        lessonOrder: 8,
+        type: 'multiple_choice',
+        prompt: 'Traduza C G A F para nomes brasileiros.',
+        payload: { options: ['Do Sol La Fa', 'Re Sol Si Fa', 'Do Fa La Mi', 'Mi Sol La Fa'], correctAnswer: 'Do Sol La Fa' },
+      },
+      {
+        lessonOrder: 9,
+        type: 'multiple_choice',
+        prompt: 'Qual afirmacao esta correta?',
+        payload: { options: ['# desce meio tom', 'b sobe meio tom', 'C representa Do', 'G representa Mi'], correctAnswer: 'C representa Do' },
+      },
+    ];
 
-    await client.query(`
-      INSERT INTO exercises (lesson_id, type, prompt, payload, xp_reward, sort_order)
-      VALUES ($1, 'multiple_choice', 'Qual e o sustenido de C?', $2, 20, 1)
-    `, [lesson4Id, JSON.stringify({
-      options: ['C#', 'D#', 'Cb', 'Db'],
-      correctAnswer: 'C#'
-    })]);
+    for (const [index, exercise] of module1Exercises.entries()) {
+      const lessonId = lessonIdByOrder.get(exercise.lessonOrder);
+      if (!lessonId) throw new Error(`Licao do modulo 1 nao encontrada: ${exercise.lessonOrder}`);
+
+      await client.query(
+        `
+          INSERT INTO exercises (lesson_id, type, prompt, payload, xp_reward, sort_order)
+          VALUES ($1, $2, $3, $4, 20, $5)
+        `,
+        [lessonId, exercise.type, exercise.prompt, JSON.stringify(exercise.payload), index + 1],
+      );
+    }
 
     // --- MODULO 2: RITMO ---
     console.log('Inserindo Módulo 2...');

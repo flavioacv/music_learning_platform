@@ -14,12 +14,35 @@ class HarmonicFieldBuilderWidget extends StatefulWidget {
   final ExerciseViewModel viewModel;
 
   @override
-  State<HarmonicFieldBuilderWidget> createState() => _HarmonicFieldBuilderWidgetState();
+  State<HarmonicFieldBuilderWidget> createState() =>
+      _HarmonicFieldBuilderWidgetState();
 }
 
-class _HarmonicFieldBuilderWidgetState extends State<HarmonicFieldBuilderWidget> {
-  final List<String> _distractors = ['C', 'Cm', 'D', 'Dm', 'E', 'Em', 'F', 'Fm', 'G', 'Gm', 'A', 'Am', 'B', 'Bm', 'Bdim', 'Cdim', 'F#m', 'C#m', 'G#m', 'Ddim'];
-  
+class _HarmonicFieldBuilderWidgetState
+    extends State<HarmonicFieldBuilderWidget> {
+  final List<String> _distractors = [
+    'C',
+    'Cm',
+    'D',
+    'Dm',
+    'E',
+    'Em',
+    'F',
+    'Fm',
+    'G',
+    'Gm',
+    'A',
+    'Am',
+    'B',
+    'Bm',
+    'Bdim',
+    'Cdim',
+    'F#m',
+    'C#m',
+    'G#m',
+    'Ddim',
+  ];
+
   List<String> _userChords = [];
   late List<String> _expectedChords;
   late List<String> _availableChords;
@@ -27,9 +50,11 @@ class _HarmonicFieldBuilderWidgetState extends State<HarmonicFieldBuilderWidget>
   @override
   void initState() {
     super.initState();
-    final answerList = List<String>.from(widget.exercise.payload['answer'] ?? []);
+    final answerList = List<String>.from(
+      widget.exercise.payload['answer'] ?? [],
+    );
     _expectedChords = answerList;
-    
+
     // Generate available options: actual answers + some distractors
     Set<String> optionsSet = Set.from(_expectedChords);
     _distractors.shuffle();
@@ -37,7 +62,7 @@ class _HarmonicFieldBuilderWidgetState extends State<HarmonicFieldBuilderWidget>
       optionsSet.add(d);
       if (optionsSet.length >= 14) break; // Limit options to 14
     }
-    
+
     _availableChords = optionsSet.toList();
     _availableChords.shuffle();
   }
@@ -69,14 +94,13 @@ class _HarmonicFieldBuilderWidgetState extends State<HarmonicFieldBuilderWidget>
         break;
       }
     }
-    
+
     widget.viewModel.submitAnswer(isCorrect);
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final keyName = widget.exercise.payload['key'] as String;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -98,7 +122,7 @@ class _HarmonicFieldBuilderWidgetState extends State<HarmonicFieldBuilderWidget>
           ),
         ),
         const SizedBox(height: 32),
-        
+
         // Slots for the chords
         Wrap(
           spacing: 8,
@@ -107,29 +131,43 @@ class _HarmonicFieldBuilderWidgetState extends State<HarmonicFieldBuilderWidget>
           children: List.generate(_expectedChords.length, (index) {
             final hasChord = index < _userChords.length;
             final chord = hasChord ? _userChords[index] : '';
-            final degreeRoman = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'][index];
-            
+            final degreeRoman = [
+              'I',
+              'II',
+              'III',
+              'IV',
+              'V',
+              'VI',
+              'VII',
+            ][index];
+
             Color bgColor = theme.colorScheme.surfaceVariant.withOpacity(0.5);
             Color borderColor = theme.colorScheme.surfaceVariant;
-            
+
             if (widget.viewModel.hasAnswered) {
-               final isCorrectSlot = hasChord && _userChords[index] == _expectedChords[index];
-               if (isCorrectSlot) {
-                 bgColor = Colors.greenAccent.withOpacity(0.2);
-                 borderColor = Colors.greenAccent;
-               } else {
-                 bgColor = Colors.redAccent.withOpacity(0.2);
-                 borderColor = Colors.redAccent;
-               }
+              final isCorrectSlot =
+                  hasChord && _userChords[index] == _expectedChords[index];
+              if (isCorrectSlot) {
+                bgColor = Colors.greenAccent.withOpacity(0.2);
+                borderColor = Colors.greenAccent;
+              } else {
+                bgColor = Colors.redAccent.withOpacity(0.2);
+                borderColor = Colors.redAccent;
+              }
             } else if (hasChord) {
-               bgColor = theme.colorScheme.primary.withOpacity(0.2);
-               borderColor = theme.colorScheme.primary;
+              bgColor = theme.colorScheme.primary.withOpacity(0.2);
+              borderColor = theme.colorScheme.primary;
             }
 
             return Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(degreeRoman, style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.primary)),
+                Text(
+                  degreeRoman,
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
                 const SizedBox(height: 4),
                 GestureDetector(
                   onTap: () => hasChord ? _removeChord(index) : null,
@@ -147,7 +185,9 @@ class _HarmonicFieldBuilderWidgetState extends State<HarmonicFieldBuilderWidget>
                       chord,
                       style: theme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: hasChord ? theme.colorScheme.onSurface : theme.colorScheme.onSurfaceVariant,
+                        color: hasChord
+                            ? theme.colorScheme.onSurface
+                            : theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ),
@@ -156,9 +196,9 @@ class _HarmonicFieldBuilderWidgetState extends State<HarmonicFieldBuilderWidget>
             );
           }),
         ).animate().fadeIn(),
-        
+
         const SizedBox(height: 48),
-        
+
         // Available Chords Grid
         if (!widget.viewModel.hasAnswered)
           Wrap(
@@ -167,7 +207,10 @@ class _HarmonicFieldBuilderWidgetState extends State<HarmonicFieldBuilderWidget>
             alignment: WrapAlignment.center,
             children: _availableChords.map((chord) {
               return ActionChip(
-                label: Text(chord, style: const TextStyle(fontWeight: FontWeight.bold)),
+                label: Text(
+                  chord,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
                 backgroundColor: theme.colorScheme.surface,
                 side: BorderSide(color: theme.colorScheme.outlineVariant),
                 onPressed: () => _addChord(chord),
@@ -179,28 +222,31 @@ class _HarmonicFieldBuilderWidgetState extends State<HarmonicFieldBuilderWidget>
         if (!widget.viewModel.hasAnswered)
           Center(
             child: FilledButton(
-              onPressed: _userChords.length == _expectedChords.length ? _checkAnswer : null,
-              style: FilledButton.styleFrom(
-                minimumSize: const Size(200, 56),
+              onPressed: _userChords.length == _expectedChords.length
+                  ? _checkAnswer
+                  : null,
+              style: FilledButton.styleFrom(minimumSize: const Size(200, 56)),
+              child: const Text(
+                'Verificar Campo Harmônico',
+                style: TextStyle(fontSize: 18),
               ),
-              child: const Text('Verificar Campo Harmônico', style: TextStyle(fontSize: 18)),
             ),
           ),
-          
+
         if (widget.viewModel.hasAnswered && !widget.viewModel.isCorrect)
-           Padding(
-             padding: const EdgeInsets.only(top: 24.0),
-             child: Center(
-               child: Text(
-                 'Correto: ${_expectedChords.join(" - ")}',
-                 style: const TextStyle(
-                   color: Colors.redAccent,
-                   fontWeight: FontWeight.bold,
-                   fontSize: 18,
-                 ),
-               ).animate().fadeIn(),
-             ),
-           ),
+          Padding(
+            padding: const EdgeInsets.only(top: 24.0),
+            child: Center(
+              child: Text(
+                'Correto: ${_expectedChords.join(" - ")}',
+                style: const TextStyle(
+                  color: Colors.redAccent,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ).animate().fadeIn(),
+            ),
+          ),
       ],
     );
   }

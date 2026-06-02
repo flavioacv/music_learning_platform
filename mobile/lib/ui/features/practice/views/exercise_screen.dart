@@ -39,7 +39,8 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
     super.initState();
     _viewModel = ExerciseViewModel(widget.repository, widget.lesson.id);
     _viewModel.addListener(_onViewModelChange);
-    _showTheory = widget.lesson.content != null && widget.lesson.content!.isNotEmpty;
+    _showTheory =
+        widget.lesson.content != null && widget.lesson.content!.isNotEmpty;
   }
 
   void _onViewModelChange() {
@@ -118,7 +119,10 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
             return ResponsiveContent(
               maxWidth: 800,
               child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 32,
+                ),
                 children: [
                   Text(
                     widget.lesson.title,
@@ -135,17 +139,8 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                     ),
                   ).animate().fadeIn(delay: 100.ms),
                   const SizedBox(height: 32),
-                  Container(
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: theme.colorScheme.surfaceVariant),
-                    ),
-                    child: Text(
-                      widget.lesson.content!,
-                      style: theme.textTheme.bodyLarge?.copyWith(height: 1.6),
-                    ),
+                  _LessonTheoryView(
+                    content: widget.lesson.content!,
                   ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.1),
                   const SizedBox(height: 48),
                   Center(
@@ -162,9 +157,15 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                       style: FilledButton.styleFrom(
                         minimumSize: const Size(200, 56),
                       ),
-                      icon: Icon(_viewModel.questionCount == 0 ? Icons.check_circle : Icons.arrow_forward),
+                      icon: Icon(
+                        _viewModel.questionCount == 0
+                            ? Icons.check_circle
+                            : Icons.arrow_forward,
+                      ),
                       label: Text(
-                        _viewModel.questionCount == 0 ? 'Concluir Lição' : 'Começar Exercícios',
+                        _viewModel.questionCount == 0
+                            ? 'Concluir Lição'
+                            : 'Começar Exercícios',
                         style: const TextStyle(fontSize: 18),
                       ),
                     ).animate().fadeIn(delay: 400.ms).scale(),
@@ -206,6 +207,91 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
   }
 }
 
+class _LessonTheoryView extends StatelessWidget {
+  const _LessonTheoryView({required this.content});
+
+  final String content;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final lines = content
+        .split('\n')
+        .map((line) => line.trim())
+        .where((line) => line.isNotEmpty)
+        .toList();
+
+    final widgets = <Widget>[];
+
+    for (final line in lines) {
+      if (line.startsWith('## ')) {
+        widgets.add(
+          Padding(
+            padding: EdgeInsets.only(top: widgets.isEmpty ? 0 : 20, bottom: 8),
+            child: Text(
+              line.substring(3),
+              style: theme.textTheme.titleLarge?.copyWith(
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+        );
+        continue;
+      }
+
+      if (line.startsWith('- ')) {
+        widgets.add(
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.check_circle,
+                  color: theme.colorScheme.secondary,
+                  size: 18,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    line.substring(2),
+                    style: theme.textTheme.bodyLarge?.copyWith(height: 1.45),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+        continue;
+      }
+
+      widgets.add(
+        Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: Text(
+            line,
+            style: theme.textTheme.bodyLarge?.copyWith(height: 1.55),
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: theme.colorScheme.surfaceVariant),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: widgets,
+      ),
+    );
+  }
+}
+
 class _ExerciseContent extends StatelessWidget {
   const _ExerciseContent({required this.viewModel});
 
@@ -227,7 +313,10 @@ class _ExerciseContent extends StatelessWidget {
       case 'chord_builder':
         return ChordBuilderWidget(exercise: exercise, viewModel: viewModel);
       case 'harmonic_field_builder':
-        return HarmonicFieldBuilderWidget(exercise: exercise, viewModel: viewModel);
+        return HarmonicFieldBuilderWidget(
+          exercise: exercise,
+          viewModel: viewModel,
+        );
       case 'audio_recognition':
         return AudioRecognitionWidget(exercise: exercise, viewModel: viewModel);
       default:
@@ -291,7 +380,7 @@ class _ExerciseContent extends StatelessWidget {
             ),
           ],
         ).animate().fadeIn().slideY(begin: -0.5),
-        
+
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 300),
           child: Container(
@@ -299,7 +388,7 @@ class _ExerciseContent extends StatelessWidget {
             child: _buildExerciseWidget(),
           ),
         ),
-        
+
         const SizedBox(height: 40),
         if (viewModel.hasAnswered)
           _FeedbackCard(
@@ -398,138 +487,132 @@ class _GamificationDialog extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (result.leveledUp) ...
-              [
-                Container(
-                  width: 96,
-                  height: 96,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        const Color(0xFFFFD700),
-                        const Color(0xFFFFA500),
-                      ],
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFFFFD700).withOpacity(0.5),
-                        blurRadius: 32,
-                        spreadRadius: 4,
-                      ),
-                    ],
-                  ),
-                  child: const Center(
-                    child: Text(
-                      '⬆',
-                      style: TextStyle(fontSize: 48),
-                    ),
-                  ),
-                )
-                    .animate()
-                    .scale(
-                      duration: 600.ms,
-                      curve: Curves.easeOutBack,
-                    )
-                    .then()
-                    .shimmer(duration: 1200.ms),
-                const SizedBox(height: 20),
-                Text(
-                  'Level Up!',
-                  style: theme.textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.w900,
-                    color: const Color(0xFFFFD700),
-                    letterSpacing: 1.5,
-                  ),
-                ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.3),
-                const SizedBox(height: 8),
-                Text(
-                  'Voce atingiu o nivel ${result.newLevel}!',
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyLarge,
-                ).animate().fadeIn(delay: 300.ms),
-                const SizedBox(height: 24),
-              ],
-            if (result.newAchievements.isNotEmpty) ...
-              [
-                Text(
-                  result.leveledUp ? 'E ainda...' : 'Conquista desbloqueada!',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ).animate().fadeIn(delay: 400.ms),
-                const SizedBox(height: 16),
-                ...result.newAchievements.asMap().entries.map((entry) {
-                  final idx = entry.key;
-                  final ach = entry.value;
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 16,
-                      ),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            theme.colorScheme.primary.withOpacity(0.15),
-                            theme.colorScheme.secondary.withOpacity(0.08),
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: theme.colorScheme.primary.withOpacity(0.4),
-                          width: 1.5,
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 48,
-                            height: 48,
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.primary.withOpacity(0.2),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.emoji_events,
-                              color: const Color(0xFFFFD700),
-                              size: 28,
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  ach.title,
-                                  style: theme.textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                                ),
-                                Text(
-                                  ach.description,
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: theme.colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+            if (result.leveledUp) ...[
+              Container(
+                    width: 96,
+                    height: 96,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          const Color(0xFFFFD700),
+                          const Color(0xFFFFA500),
                         ],
                       ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFFFFD700).withOpacity(0.5),
+                          blurRadius: 32,
+                          spreadRadius: 4,
+                        ),
+                      ],
+                    ),
+                    child: const Center(
+                      child: Text('⬆', style: TextStyle(fontSize: 48)),
                     ),
                   )
-                      .animate()
-                      .fadeIn(delay: (500 + idx * 150).ms)
-                      .slideX(begin: 0.3);
-                }),
-                const SizedBox(height: 8),
-              ],
+                  .animate()
+                  .scale(duration: 600.ms, curve: Curves.easeOutBack)
+                  .then()
+                  .shimmer(duration: 1200.ms),
+              const SizedBox(height: 20),
+              Text(
+                'Level Up!',
+                style: theme.textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.w900,
+                  color: const Color(0xFFFFD700),
+                  letterSpacing: 1.5,
+                ),
+              ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.3),
+              const SizedBox(height: 8),
+              Text(
+                'Voce atingiu o nivel ${result.newLevel}!',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyLarge,
+              ).animate().fadeIn(delay: 300.ms),
+              const SizedBox(height: 24),
+            ],
+            if (result.newAchievements.isNotEmpty) ...[
+              Text(
+                result.leveledUp ? 'E ainda...' : 'Conquista desbloqueada!',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ).animate().fadeIn(delay: 400.ms),
+              const SizedBox(height: 16),
+              ...result.newAchievements.asMap().entries.map((entry) {
+                final idx = entry.key;
+                final ach = entry.value;
+                return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 16,
+                        ),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              theme.colorScheme.primary.withOpacity(0.15),
+                              theme.colorScheme.secondary.withOpacity(0.08),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: theme.colorScheme.primary.withOpacity(0.4),
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 48,
+                              height: 48,
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.primary.withOpacity(
+                                  0.2,
+                                ),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.emoji_events,
+                                color: const Color(0xFFFFD700),
+                                size: 28,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    ach.title,
+                                    style: theme.textTheme.titleSmall?.copyWith(
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                  Text(
+                                    ach.description,
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: theme.colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                    .animate()
+                    .fadeIn(delay: (500 + idx * 150).ms)
+                    .slideX(begin: 0.3);
+              }),
+              const SizedBox(height: 8),
+            ],
             FilledButton.icon(
               onPressed: () => Navigator.of(context).pop(),
               style: FilledButton.styleFrom(

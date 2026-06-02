@@ -19,16 +19,34 @@ class ScaleBuilderWidget extends StatefulWidget {
 
 class _ScaleBuilderWidgetState extends State<ScaleBuilderWidget> {
   final List<String> _allNotes = [
-    'C', 'C#', 'Db', 'D', 'D#', 'Eb', 'E', 'F', 'F#', 'Gb', 'G', 'G#', 'Ab', 'A', 'A#', 'Bb', 'B'
+    'C',
+    'C#',
+    'Db',
+    'D',
+    'D#',
+    'Eb',
+    'E',
+    'F',
+    'F#',
+    'Gb',
+    'G',
+    'G#',
+    'Ab',
+    'A',
+    'A#',
+    'Bb',
+    'B',
   ];
-  
+
   List<String> _userScale = [];
   late List<String> _expectedScale;
 
   @override
   void initState() {
     super.initState();
-    _expectedScale = List<String>.from(widget.exercise.payload['expectedScale'] ?? []);
+    _expectedScale = List<String>.from(
+      widget.exercise.payload['expectedScale'] ?? [],
+    );
   }
 
   void _addNote(String note) {
@@ -58,14 +76,13 @@ class _ScaleBuilderWidgetState extends State<ScaleBuilderWidget> {
         break;
       }
     }
-    
+
     widget.viewModel.submitAnswer(isCorrect);
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final rootNote = widget.exercise.payload['rootNote'] as String;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -87,7 +104,7 @@ class _ScaleBuilderWidgetState extends State<ScaleBuilderWidget> {
           ),
         ),
         const SizedBox(height: 32),
-        
+
         // Slots for the scale
         Wrap(
           spacing: 8,
@@ -96,22 +113,23 @@ class _ScaleBuilderWidgetState extends State<ScaleBuilderWidget> {
           children: List.generate(_expectedScale.length, (index) {
             final hasNote = index < _userScale.length;
             final note = hasNote ? _userScale[index] : '';
-            
+
             Color bgColor = theme.colorScheme.surfaceVariant.withOpacity(0.5);
             Color borderColor = theme.colorScheme.surfaceVariant;
-            
+
             if (widget.viewModel.hasAnswered) {
-               final isCorrectSlot = hasNote && _userScale[index] == _expectedScale[index];
-               if (isCorrectSlot) {
-                 bgColor = Colors.greenAccent.withOpacity(0.2);
-                 borderColor = Colors.greenAccent;
-               } else {
-                 bgColor = Colors.redAccent.withOpacity(0.2);
-                 borderColor = Colors.redAccent;
-               }
+              final isCorrectSlot =
+                  hasNote && _userScale[index] == _expectedScale[index];
+              if (isCorrectSlot) {
+                bgColor = Colors.greenAccent.withOpacity(0.2);
+                borderColor = Colors.greenAccent;
+              } else {
+                bgColor = Colors.redAccent.withOpacity(0.2);
+                borderColor = Colors.redAccent;
+              }
             } else if (hasNote) {
-               bgColor = theme.colorScheme.primary.withOpacity(0.2);
-               borderColor = theme.colorScheme.primary;
+              bgColor = theme.colorScheme.primary.withOpacity(0.2);
+              borderColor = theme.colorScheme.primary;
             }
 
             return GestureDetector(
@@ -130,16 +148,18 @@ class _ScaleBuilderWidgetState extends State<ScaleBuilderWidget> {
                   note,
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: hasNote ? theme.colorScheme.onSurface : theme.colorScheme.onSurfaceVariant,
+                    color: hasNote
+                        ? theme.colorScheme.onSurface
+                        : theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
               ),
             );
           }),
         ).animate().fadeIn(),
-        
+
         const SizedBox(height: 48),
-        
+
         // Available Notes Grid
         if (!widget.viewModel.hasAnswered)
           Wrap(
@@ -148,7 +168,10 @@ class _ScaleBuilderWidgetState extends State<ScaleBuilderWidget> {
             alignment: WrapAlignment.center,
             children: _allNotes.map((note) {
               return ActionChip(
-                label: Text(note, style: const TextStyle(fontWeight: FontWeight.bold)),
+                label: Text(
+                  note,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
                 backgroundColor: theme.colorScheme.surface,
                 side: BorderSide(color: theme.colorScheme.outlineVariant),
                 onPressed: () => _addNote(note),
@@ -160,28 +183,31 @@ class _ScaleBuilderWidgetState extends State<ScaleBuilderWidget> {
         if (!widget.viewModel.hasAnswered)
           Center(
             child: FilledButton(
-              onPressed: _userScale.length == _expectedScale.length ? _checkAnswer : null,
-              style: FilledButton.styleFrom(
-                minimumSize: const Size(200, 56),
+              onPressed: _userScale.length == _expectedScale.length
+                  ? _checkAnswer
+                  : null,
+              style: FilledButton.styleFrom(minimumSize: const Size(200, 56)),
+              child: const Text(
+                'Verificar Escala',
+                style: TextStyle(fontSize: 18),
               ),
-              child: const Text('Verificar Escala', style: TextStyle(fontSize: 18)),
             ),
           ),
-          
+
         if (widget.viewModel.hasAnswered && !widget.viewModel.isCorrect)
-           Padding(
-             padding: const EdgeInsets.only(top: 24.0),
-             child: Center(
-               child: Text(
-                 'A escala correta era: ${_expectedScale.join(" - ")}',
-                 style: const TextStyle(
-                   color: Colors.redAccent,
-                   fontWeight: FontWeight.bold,
-                   fontSize: 18,
-                 ),
-               ).animate().fadeIn(),
-             ),
-           ),
+          Padding(
+            padding: const EdgeInsets.only(top: 24.0),
+            child: Center(
+              child: Text(
+                'A escala correta era: ${_expectedScale.join(" - ")}',
+                style: const TextStyle(
+                  color: Colors.redAccent,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ).animate().fadeIn(),
+            ),
+          ),
       ],
     );
   }

@@ -86,7 +86,6 @@ class _ProfileContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final xpForCurrentLevel = (user.level - 1) * 100;
-    final xpForNextLevel = user.level * 100;
     final xpProgress = (user.xp - xpForCurrentLevel).clamp(0, 100);
     final levelProgress = xpProgress / 100.0;
 
@@ -191,7 +190,11 @@ class _ProfileContent extends StatelessWidget {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.star, color: Colors.black, size: 18),
+                            const Icon(
+                              Icons.star,
+                              color: Colors.black,
+                              size: 18,
+                            ),
                             const SizedBox(width: 6),
                             Text(
                               'Nivel ${user.level}',
@@ -230,8 +233,7 @@ class _ProfileContent extends StatelessWidget {
                       builder: (context, value, _) => LinearProgressIndicator(
                         value: value,
                         minHeight: 14,
-                        backgroundColor:
-                            theme.colorScheme.surfaceVariant,
+                        backgroundColor: theme.colorScheme.surfaceVariant,
                         valueColor: AlwaysStoppedAnimation<Color>(
                           const Color(0xFFFFD700),
                         ),
@@ -284,9 +286,9 @@ class _ProfileContent extends StatelessWidget {
             final isUnlocked = unlockedCodes.contains(info.code);
             final unlockedAt = isUnlocked
                 ? progress!.achievements
-                    .where((a) => a.code == info.code)
-                    .firstOrNull
-                    ?.unlockedAt
+                      .where((a) => a.code == info.code)
+                      .firstOrNull
+                      ?.unlockedAt
                 : null;
 
             return Padding(
@@ -296,10 +298,7 @@ class _ProfileContent extends StatelessWidget {
                 isUnlocked: isUnlocked,
                 unlockedAt: unlockedAt,
               ),
-            )
-                .animate()
-                .fadeIn(delay: (350 + idx * 100).ms)
-                .slideX(begin: 0.1);
+            ).animate().fadeIn(delay: (350 + idx * 100).ms).slideX(begin: 0.1);
           }),
           const SizedBox(height: 32),
 
@@ -308,9 +307,7 @@ class _ProfileContent extends StatelessWidget {
             onPressed: onSignOut,
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
-              side: BorderSide(
-                color: theme.colorScheme.error.withOpacity(0.5),
-              ),
+              side: BorderSide(color: theme.colorScheme.error.withOpacity(0.5)),
               foregroundColor: theme.colorScheme.error,
             ),
             icon: const Icon(Icons.logout),
@@ -370,7 +367,9 @@ class _AchievementCard extends StatelessWidget {
                 ],
               )
             : null,
-        color: isUnlocked ? null : theme.colorScheme.surfaceVariant.withOpacity(0.3),
+        color: isUnlocked
+            ? null
+            : theme.colorScheme.surfaceVariant.withOpacity(0.3),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -409,7 +408,9 @@ class _AchievementCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    isUnlocked ? info.description : 'Continue estudando para desbloquear.',
+                    isUnlocked
+                        ? info.description
+                        : 'Continue estudando para desbloquear.',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: isUnlocked
                           ? theme.colorScheme.onSurfaceVariant
