@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'data/repositories/admin_repository.dart';
 import 'data/repositories/auth_repository.dart';
 import 'data/repositories/learning_repository.dart';
 import 'data/services/api_client.dart';
@@ -23,6 +24,7 @@ class MusicLearningApp extends StatefulWidget {
 
 class _MusicLearningAppState extends State<MusicLearningApp> {
   late final ApiClient _apiClient;
+  late final AdminRepository _adminRepository;
   late final AuthRepository _authRepository;
   late final LearningRepository _learningRepository;
   AppUser? _user;
@@ -31,6 +33,7 @@ class _MusicLearningAppState extends State<MusicLearningApp> {
   void initState() {
     super.initState();
     _apiClient = ApiClient();
+    _adminRepository = AdminRepository(_apiClient);
     _authRepository = AuthRepository(_apiClient);
     _learningRepository = LearningRepository(_apiClient);
     _user = widget.initialUser;
@@ -57,6 +60,7 @@ class _MusicLearningAppState extends State<MusicLearningApp> {
           ? AuthScreen(authRepository: _authRepository, onSignedIn: _signIn)
           : HomeShell(
               user: _user!,
+              adminRepository: _adminRepository,
               learningRepository: _learningRepository,
               onSignOut: _signOut,
             ),

@@ -4,6 +4,7 @@ import Fastify from 'fastify';
 import { ZodError } from 'zod';
 
 import { authRoutes } from './modules/auth/auth.routes.js';
+import { adminRoutes } from './modules/admin/admin.routes.js';
 import { catalogRoutes } from './modules/catalog/catalog.routes.js';
 import { exercisesRoutes } from './modules/exercises/exercises.routes.js';
 import { progressRoutes } from './modules/progress/progress.routes.js';
@@ -23,6 +24,7 @@ export function buildApp() {
   app.get('/health', async () => success({ status: 'ok' }));
 
   app.register(authRoutes, { prefix: '/api/v1/auth' });
+  app.register(adminRoutes, { prefix: '/api/v1/admin' });
   app.register(catalogRoutes, { prefix: '/api/v1/catalog' });
   app.register(exercisesRoutes, { prefix: '/api/v1/exercises' });
   app.register(progressRoutes, { prefix: '/api/v1/progress' });

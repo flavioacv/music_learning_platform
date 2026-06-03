@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
+import '../../../../data/repositories/admin_repository.dart';
 import '../../../../data/repositories/learning_repository.dart';
 import '../../../../domain/models/auth_models.dart';
 import '../../../../domain/models/course_models.dart';
 import '../../../../domain/models/progress_models.dart';
 import '../../../core/responsive_content.dart';
+import '../../admin/views/admin_screen.dart';
 import '../../course/views/course_screen.dart';
 import '../../profile/views/profile_screen.dart';
 
@@ -13,11 +15,13 @@ class HomeShell extends StatefulWidget {
   const HomeShell({
     super.key,
     required this.user,
+    required this.adminRepository,
     required this.learningRepository,
     required this.onSignOut,
   });
 
   final AppUser user;
+  final AdminRepository adminRepository;
   final LearningRepository learningRepository;
   final VoidCallback onSignOut;
 
@@ -30,6 +34,7 @@ class _HomeShellState extends State<HomeShell> {
 
   @override
   Widget build(BuildContext context) {
+    final canViewAdmin = widget.user.isAdmin;
     final screens = [
       DashboardScreen(
         user: widget.user,
@@ -42,7 +47,58 @@ class _HomeShellState extends State<HomeShell> {
         learningRepository: widget.learningRepository,
         onSignOut: widget.onSignOut,
       ),
+      if (canViewAdmin) AdminScreen(adminRepository: widget.adminRepository),
     ];
+    final railDestinations = [
+      const NavigationRailDestination(
+        icon: Icon(Icons.home_outlined),
+        selectedIcon: Icon(Icons.home),
+        label: Text('Inicio'),
+      ),
+      const NavigationRailDestination(
+        icon: Icon(Icons.school_outlined),
+        selectedIcon: Icon(Icons.school),
+        label: Text('Curso'),
+      ),
+      const NavigationRailDestination(
+        icon: Icon(Icons.person_outline),
+        selectedIcon: Icon(Icons.person),
+        label: Text('Perfil'),
+      ),
+      if (canViewAdmin)
+        const NavigationRailDestination(
+          icon: Icon(Icons.admin_panel_settings_outlined),
+          selectedIcon: Icon(Icons.admin_panel_settings),
+          label: Text('Admin'),
+        ),
+    ];
+    final barDestinations = [
+      const NavigationDestination(
+        icon: Icon(Icons.home_outlined),
+        selectedIcon: Icon(Icons.home),
+        label: 'Inicio',
+      ),
+      const NavigationDestination(
+        icon: Icon(Icons.school_outlined),
+        selectedIcon: Icon(Icons.school),
+        label: 'Curso',
+      ),
+      const NavigationDestination(
+        icon: Icon(Icons.person_outline),
+        selectedIcon: Icon(Icons.person),
+        label: 'Perfil',
+      ),
+      if (canViewAdmin)
+        const NavigationDestination(
+          icon: Icon(Icons.admin_panel_settings_outlined),
+          selectedIcon: Icon(Icons.admin_panel_settings),
+          label: 'Admin',
+        ),
+    ];
+
+    if (_selectedIndex >= screens.length) {
+      _selectedIndex = 0;
+    }
 
     return Scaffold(
       body: SafeArea(
@@ -66,23 +122,7 @@ class _HomeShellState extends State<HomeShell> {
                         size: 32,
                       ),
                     ),
-                    destinations: const [
-                      NavigationRailDestination(
-                        icon: Icon(Icons.home_outlined),
-                        selectedIcon: Icon(Icons.home),
-                        label: Text('Inicio'),
-                      ),
-                      NavigationRailDestination(
-                        icon: Icon(Icons.school_outlined),
-                        selectedIcon: Icon(Icons.school),
-                        label: Text('Curso'),
-                      ),
-                      NavigationRailDestination(
-                        icon: Icon(Icons.person_outline),
-                        selectedIcon: Icon(Icons.person),
-                        label: Text('Perfil'),
-                      ),
-                    ],
+                    destinations: railDestinations,
                   ),
                   const VerticalDivider(thickness: 1, width: 1),
                   Expanded(child: screens[_selectedIndex]),
@@ -97,23 +137,7 @@ class _HomeShellState extends State<HomeShell> {
                   selectedIndex: _selectedIndex,
                   onDestinationSelected: (index) =>
                       setState(() => _selectedIndex = index),
-                  destinations: const [
-                    NavigationDestination(
-                      icon: Icon(Icons.home_outlined),
-                      selectedIcon: Icon(Icons.home),
-                      label: 'Inicio',
-                    ),
-                    NavigationDestination(
-                      icon: Icon(Icons.school_outlined),
-                      selectedIcon: Icon(Icons.school),
-                      label: 'Curso',
-                    ),
-                    NavigationDestination(
-                      icon: Icon(Icons.person_outline),
-                      selectedIcon: Icon(Icons.person),
-                      label: 'Perfil',
-                    ),
-                  ],
+                  destinations: barDestinations,
                 ),
               ],
             );

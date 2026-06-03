@@ -16,6 +16,10 @@ export function unauthorized(message = 'Authentication required') {
   return new AppError(401, 'unauthorized', message);
 }
 
+export function forbidden(message = 'Forbidden') {
+  return new AppError(403, 'forbidden', message);
+}
+
 export function conflict(message: string, code = 'conflict') {
   return new AppError(409, code, message);
 }

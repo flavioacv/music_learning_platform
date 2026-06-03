@@ -5,6 +5,7 @@ class AppUser {
     required this.email,
     required this.level,
     required this.xp,
+    this.isAdmin = false,
     this.avatarUrl,
   });
 
@@ -13,6 +14,7 @@ class AppUser {
   final String email;
   final int level;
   final int xp;
+  final bool isAdmin;
   final String? avatarUrl;
 
   factory AppUser.fromJson(Map<String, dynamic> json) {
@@ -22,6 +24,7 @@ class AppUser {
       email: json['email'] as String,
       level: json['level'] as int,
       xp: json['xp'] as int,
+      isAdmin: json['isAdmin'] as bool? ?? false,
       avatarUrl: json['avatar_url'] as String?,
     );
   }

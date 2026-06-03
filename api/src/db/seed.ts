@@ -1,5 +1,6 @@
 import type { PoolClient } from 'pg';
 import { pool } from './pool.js';
+import { hashPassword } from '../shared/security/password.js';
 
 type SeedLesson = {
   title: string;
@@ -14,6 +15,12 @@ type SeedExercise = {
   type: string;
   prompt: string;
   payload: Record<string, unknown>;
+};
+
+const adminUser = {
+  name: 'Admin',
+  email: 'admin@admin.com',
+  password: 'abc123',
 };
 
 function lessonContent(sections: Record<string, string | string[]>) {
@@ -55,6 +62,37 @@ async function upsertAchievement(
       RETURNING id
     `,
     [code, title, description, xpReward],
+  );
+
+  return inserted.rows[0].id;
+}
+
+async function upsertAdminUser(client: PoolClient) {
+  const passwordHash = await hashPassword(adminUser.password);
+  const existing = await client.query<{ id: string }>(
+    'SELECT id FROM users WHERE email = $1',
+    [adminUser.email],
+  );
+
+  if (existing.rowCount && existing.rowCount > 0) {
+    await client.query(
+      `
+        UPDATE users
+        SET name = $1, password_hash = $2, updated_at = now()
+        WHERE email = $3
+      `,
+      [adminUser.name, passwordHash, adminUser.email],
+    );
+    return existing.rows[0].id;
+  }
+
+  const inserted = await client.query<{ id: string }>(
+    `
+      INSERT INTO users (name, email, password_hash)
+      VALUES ($1, $2, $3)
+      RETURNING id
+    `,
+    [adminUser.name, adminUser.email, passwordHash],
   );
 
   return inserted.rows[0].id;
@@ -240,6 +278,9 @@ async function seed() {
   
   try {
     await client.query('BEGIN');
+
+    console.log('Atualizando usuario admin...');
+    await upsertAdminUser(client);
 
     console.log('Atualizando conquistas base...');
     await upsertAchievement(client, 'first_lesson', 'Primeiro som', 'Concluiu a primeira licao.', 10);

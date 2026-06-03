@@ -1,12 +1,20 @@
 import { conflict, unauthorized } from '../../shared/http/errors.js';
 import { hashPassword, verifyPassword } from '../../shared/security/password.js';
 import { signAuthToken } from '../../shared/security/token.js';
+import { isAdminEmail } from '../../config/env.js';
 import type { LoginInput, RegisterInput } from './auth.schemas.js';
 import {
   createUser,
   findPublicUserById,
   findUserByEmail,
 } from './auth.repository.js';
+
+function withAdminFlag<T extends { email: string }>(user: T) {
+  return {
+    ...user,
+    isAdmin: isAdminEmail(user.email),
+  };
+}
 
 export async function register(input: RegisterInput) {
   const existingUser = await findUserByEmail(input.email);
@@ -22,7 +30,7 @@ export async function register(input: RegisterInput) {
   });
   const token = await signAuthToken({ sub: user.id, email: user.email });
 
-  return { user, token };
+  return { user: withAdminFlag(user), token };
 }
 
 export async function login(input: LoginInput) {
@@ -42,7 +50,7 @@ export async function login(input: LoginInput) {
   const token = await signAuthToken({ sub: user.id, email: user.email });
   const { password_hash: _, ...publicUser } = user;
 
-  return { user: publicUser, token };
+  return { user: withAdminFlag(publicUser), token };
 }
 
 export async function getMe(userId: string) {
@@ -51,5 +59,5 @@ export async function getMe(userId: string) {
     throw unauthorized('Invalid user');
   }
 
-  return user;
+  return withAdminFlag(user);
 }
