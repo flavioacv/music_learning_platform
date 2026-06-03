@@ -35,6 +35,30 @@ function lessonContent(sections: Record<string, string | string[]>) {
     .join('\n\n');
 }
 
+function distributeCorrectOption(
+  payload: Record<string, unknown>,
+  sortOrder: number,
+): Record<string, unknown> {
+  if (!Array.isArray(payload.options) || typeof payload.correctAnswer !== 'string') {
+    return payload;
+  }
+
+  const options = [...payload.options] as unknown[];
+  const correctIndex = options.indexOf(payload.correctAnswer);
+  if (correctIndex === -1 || options.length < 2) {
+    return payload;
+  }
+
+  const targetIndex = (sortOrder - 1) % options.length;
+  const [correctOption] = options.splice(correctIndex, 1);
+  options.splice(targetIndex, 0, correctOption);
+
+  return {
+    ...payload,
+    options,
+  };
+}
+
 async function upsertAchievement(
   client: PoolClient,
   code: string,
@@ -201,6 +225,7 @@ async function upsertExercise(
   exercise: Omit<SeedExercise, 'lessonOrder'>,
   sortOrder: number,
 ) {
+  const payload = distributeCorrectOption(exercise.payload, sortOrder);
   const existing = await client.query<{ id: string }>(
     'SELECT id FROM exercises WHERE lesson_id = $1 AND sort_order = $2 LIMIT 1',
     [lessonId, sortOrder],
@@ -213,7 +238,7 @@ async function upsertExercise(
         SET type = $1, prompt = $2, payload = $3, xp_reward = 20
         WHERE id = $4
       `,
-      [exercise.type, exercise.prompt, JSON.stringify(exercise.payload), existing.rows[0].id],
+      [exercise.type, exercise.prompt, JSON.stringify(payload), existing.rows[0].id],
     );
     return existing.rows[0].id;
   }
@@ -224,7 +249,7 @@ async function upsertExercise(
       VALUES ($1, $2, $3, $4, 20, $5)
       RETURNING id
     `,
-    [lessonId, exercise.type, exercise.prompt, JSON.stringify(exercise.payload), sortOrder],
+    [lessonId, exercise.type, exercise.prompt, JSON.stringify(payload), sortOrder],
   );
 
   return inserted.rows[0].id;
@@ -473,6 +498,16 @@ async function seed() {
         },
       },
       {
+        lessonOrder: 1,
+        type: 'multiple_choice',
+        prompt: 'Por que nomear uma nota ajuda no estudo?',
+        payload: {
+          options: ['Porque permite reconhecer e comparar sons', 'Porque aumenta automaticamente o volume', 'Porque substitui o ritmo', 'Porque muda o instrumento tocado'],
+          correctAnswer: 'Porque permite reconhecer e comparar sons',
+          feedback: 'Quando voce da nome ao som, consegue lembrar, comparar e combinar esse som em escalas, acordes e melodias.',
+        },
+      },
+      {
         lessonOrder: 2,
         type: 'multiple_choice',
         prompt: 'Qual nota vem depois de Mi?',
@@ -490,6 +525,16 @@ async function seed() {
           sentence: 'Depois de Si, a sequencia volta para _____.',
           answer: 'Do',
           feedback: 'As notas funcionam em ciclo. Depois de Si, voltamos para Do em uma regiao mais aguda.',
+        },
+      },
+      {
+        lessonOrder: 2,
+        type: 'multiple_choice',
+        prompt: 'Qual trecho mantém a ordem natural das notas?',
+        payload: {
+          options: ['Fa Sol La', 'Fa Mi Re', 'Sol Fa La', 'La Do Si'],
+          correctAnswer: 'Fa Sol La',
+          feedback: 'A ordem natural segue Do, Re, Mi, Fa, Sol, La, Si. Por isso Fa, Sol, La aparece em sequencia correta.',
         },
       },
       {
@@ -543,6 +588,16 @@ async function seed() {
         },
       },
       {
+        lessonOrder: 4,
+        type: 'multiple_choice',
+        prompt: 'Se F sobe meio tom, qual nome aparece?',
+        payload: {
+          options: ['F#', 'E', 'Fb', 'G'],
+          correctAnswer: 'F#',
+          feedback: 'Sustenido sobe meio tom mantendo a letra da nota. F subindo meio tom vira F#.',
+        },
+      },
+      {
         lessonOrder: 5,
         type: 'multiple_choice',
         prompt: 'Qual opcao mostra D descendo meio tom?',
@@ -590,6 +645,26 @@ async function seed() {
           options: ['# desce meio tom', 'b sobe meio tom', 'C representa Do', 'G representa Mi'],
           correctAnswer: 'C representa Do',
           feedback: 'C representa Do. Lembre tambem: # sobe meio tom e b desce meio tom.',
+        },
+      },
+      {
+        lessonOrder: 9,
+        type: 'multiple_choice',
+        prompt: 'Qual combinacao revisa corretamente cifra e acidente?',
+        payload: {
+          options: ['A e La; # sobe meio tom', 'C e Fa; b sobe meio tom', 'G e Mi; # desce meio tom', 'B e Do; b aumenta a nota'],
+          correctAnswer: 'A e La; # sobe meio tom',
+          feedback: 'A representa La na cifra americana, e o sustenido (#) sobe a nota em meio tom.',
+        },
+      },
+      {
+        lessonOrder: 9,
+        type: 'fill_blank',
+        prompt: 'Na cifra americana, F representa _____.',
+        payload: {
+          sentence: 'Na cifra americana, F representa _____.',
+          answer: 'Fa',
+          feedback: 'F representa Fa. Junto com C=Do, D=Re, E=Mi, G=Sol, A=La e B=Si, voce completa o mapa basico.',
         },
       },
     ];
@@ -819,6 +894,16 @@ async function seed() {
         },
       },
       {
+        lessonOrder: 2,
+        type: 'rhythm_tap',
+        prompt: 'Sinta a pulsacao com quatro toques constantes',
+        payload: {
+          bpm: 68,
+          pattern: [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0],
+          feedback: 'A pulsacao aparece como uma referencia regular. O objetivo aqui e manter os quatro toques igualmente espacados.',
+        },
+      },
+      {
         lessonOrder: 3,
         type: 'fill_blank',
         prompt: 'BPM significa batidas por _____.',
@@ -856,6 +941,16 @@ async function seed() {
           options: ['1/2 tempo', '1 tempo', '2 tempos', '4 tempos'],
           correctAnswer: '2 tempos',
           feedback: 'A minima dura dois tempos. Duas minimas completam um compasso 4/4.',
+        },
+      },
+      {
+        lessonOrder: 6,
+        type: 'multiple_choice',
+        prompt: 'Quantas minimas completam um compasso 4/4?',
+        payload: {
+          options: ['Duas', 'Uma', 'Quatro', 'Oito'],
+          correctAnswer: 'Duas',
+          feedback: 'Cada minima dura dois tempos. Em 4/4, duas minimas somam os quatro tempos do compasso.',
         },
       },
       {
@@ -899,6 +994,16 @@ async function seed() {
         },
       },
       {
+        lessonOrder: 10,
+        type: 'rhythm_tap',
+        prompt: 'Pratique com metronomo lento: toque no 1 e no 4',
+        payload: {
+          bpm: 60,
+          pattern: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+          feedback: 'O metronomo lento expõe qualquer pressa. Conte 1, 2, 3, 4 e toque apenas no 1 e no 4.',
+        },
+      },
+      {
         lessonOrder: 11,
         type: 'rhythm_tap',
         prompt: 'Toque nos tempos 1 e 3',
@@ -926,6 +1031,26 @@ async function seed() {
           options: ['Ritmo e som no tempo; BPM mede velocidade', 'BPM e nome de nota', 'Compasso elimina a pulsacao', 'Colcheia dura quatro tempos'],
           correctAnswer: 'Ritmo e som no tempo; BPM mede velocidade',
           feedback: 'Ritmo organiza sons e silencios no tempo; BPM define a velocidade da pulsacao.',
+        },
+      },
+      {
+        lessonOrder: 12,
+        type: 'multiple_choice',
+        prompt: 'Qual escolha mostra uma relacao correta entre figura e duracao?',
+        payload: {
+          options: ['Semibreve dura 4 tempos em 4/4', 'Colcheia dura 4 tempos', 'Minima dura meio tempo', 'Seminima dura 2 compassos'],
+          correctAnswer: 'Semibreve dura 4 tempos em 4/4',
+          feedback: 'No 4/4, a semibreve ocupa o compasso inteiro: quatro tempos.',
+        },
+      },
+      {
+        lessonOrder: 12,
+        type: 'rhythm_tap',
+        prompt: 'Avaliação rítmica: alterne toque e silêncio',
+        payload: {
+          bpm: 84,
+          pattern: [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0],
+          feedback: 'Este padrao mistura tempo forte, espera e subdivisao. Conte internamente para manter o desenho claro.',
         },
       },
     ];
@@ -1105,6 +1230,16 @@ async function seed() {
         },
       },
       {
+        lessonOrder: 3,
+        type: 'multiple_choice',
+        prompt: 'Na formula maior, onde aparece o primeiro semitom?',
+        payload: {
+          options: ['Entre o 3 e o 4 grau', 'Entre o 1 e o 2 grau', 'Entre o 5 e o 6 grau', 'Entre todos os graus'],
+          correctAnswer: 'Entre o 3 e o 4 grau',
+          feedback: 'A formula maior e T-T-S-T-T-T-S. O primeiro S aparece entre o terceiro e o quarto grau.',
+        },
+      },
+      {
         lessonOrder: 4,
         type: 'scale_builder',
         prompt: 'Construa a Escala de C Maior',
@@ -1145,6 +1280,16 @@ async function seed() {
         },
       },
       {
+        lessonOrder: 6,
+        type: 'multiple_choice',
+        prompt: 'Qual pista ajuda a achar a relativa menor?',
+        payload: {
+          options: ['Olhar o sexto grau da escala maior', 'Contar quatro tempos de ritmo', 'Escolher sempre a nota C', 'Trocar a tônica por sustenido'],
+          correctAnswer: 'Olhar o sexto grau da escala maior',
+          feedback: 'A relativa menor compartilha as notas da escala maior e começa no sexto grau.',
+        },
+      },
+      {
         lessonOrder: 7,
         type: 'scale_builder',
         prompt: 'Construa a Escala de D Maior',
@@ -1172,6 +1317,26 @@ async function seed() {
           options: ['A formula maior e T-T-S-T-T-T-S', 'Toda escala maior usa apenas notas naturais', 'G maior nao tem sustenido', 'Tom e igual a um quarto de tempo'],
           correctAnswer: 'A formula maior e T-T-S-T-T-T-S',
           feedback: 'A formula maior e T-T-S-T-T-T-S. Algumas escalas precisam de acidentes para manter essa formula.',
+        },
+      },
+      {
+        lessonOrder: 8,
+        type: 'scale_builder',
+        prompt: 'Avaliação: construa a Escala de F Maior',
+        payload: {
+          rootNote: 'F',
+          expectedScale: ['F', 'G', 'A', 'Bb', 'C', 'D', 'E'],
+          feedback: 'F maior usa Bb para preservar a formula maior: F, G, A, Bb, C, D, E.',
+        },
+      },
+      {
+        lessonOrder: 8,
+        type: 'multiple_choice',
+        prompt: 'Qual escala maior usa Bb?',
+        payload: {
+          options: ['F maior', 'G maior', 'D maior', 'A maior'],
+          correctAnswer: 'F maior',
+          feedback: 'F maior tem Bb. G, D e A maior usam sustenidos, nao Bb, neste nivel de estudo.',
         },
       },
     ];
@@ -1356,6 +1521,17 @@ async function seed() {
         },
       },
       {
+        lessonOrder: 2,
+        type: 'interval_builder',
+        prompt: 'Construa uma segunda maior a partir de G',
+        payload: {
+          rootNote: 'G',
+          interval: '2M',
+          answer: 'A',
+          feedback: 'G para A conta duas letras: G(1), A(2).',
+        },
+      },
+      {
         lessonOrder: 3,
         type: 'interval_builder',
         prompt: 'Construa uma terça maior a partir de C',
@@ -1400,6 +1576,17 @@ async function seed() {
         },
       },
       {
+        lessonOrder: 5,
+        type: 'interval_builder',
+        prompt: 'Construa uma quinta justa a partir de F',
+        payload: {
+          rootNote: 'F',
+          interval: '5J',
+          answer: 'C',
+          feedback: 'F para C conta F(1), G(2), A(3), B(4), C(5).',
+        },
+      },
+      {
         lessonOrder: 6,
         type: 'multiple_choice',
         prompt: 'Qual nota e a sexta acima de C?',
@@ -1438,6 +1625,27 @@ async function seed() {
           options: ['C para G e uma quinta', 'C para E e uma segunda', 'Oitava troca o nome da nota', 'Intervalo mede BPM'],
           correctAnswer: 'C para G e uma quinta',
           feedback: 'C para G conta C(1), D(2), E(3), F(4), G(5): quinta.',
+        },
+      },
+      {
+        lessonOrder: 9,
+        type: 'multiple_choice',
+        prompt: 'Qual relacao entre intervalo e acorde esta correta?',
+        payload: {
+          options: ['A terça ajuda a definir maior ou menor', 'O BPM define a terça', 'A oitava sempre muda o nome da nota', 'Intervalo elimina a raiz'],
+          correctAnswer: 'A terça ajuda a definir maior ou menor',
+          feedback: 'A terça e decisiva para a cor do acorde: terça maior tende a soar maior; terça menor tende a soar menor.',
+        },
+      },
+      {
+        lessonOrder: 9,
+        type: 'interval_builder',
+        prompt: 'Avaliação: construa uma terça maior a partir de F',
+        payload: {
+          rootNote: 'F',
+          interval: '3M',
+          answer: 'A',
+          feedback: 'F para A conta F(1), G(2), A(3). Essa terça maior ajuda a formar F maior.',
         },
       },
     ];
@@ -1628,6 +1836,17 @@ async function seed() {
         },
       },
       {
+        lessonOrder: 3,
+        type: 'chord_builder',
+        prompt: 'Construa um acorde maior de F',
+        payload: {
+          rootNote: 'F',
+          chordType: 'Major',
+          answer: 'F A C',
+          feedback: 'F maior usa F, A e C: raiz, terça maior e quinta justa.',
+        },
+      },
+      {
         lessonOrder: 4,
         type: 'chord_builder',
         prompt: 'Construa um acorde menor de A',
@@ -1647,6 +1866,16 @@ async function seed() {
           chordType: 'Minor',
           answer: 'D F A',
           feedback: 'D menor usa D, F e A: raiz, terça menor e quinta justa.',
+        },
+      },
+      {
+        lessonOrder: 4,
+        type: 'multiple_choice',
+        prompt: 'Qual nota dá a cor menor ao acorde A menor?',
+        payload: {
+          options: ['C', 'E', 'G', 'B'],
+          correctAnswer: 'C',
+          feedback: 'Em A menor, a nota C e a terça menor. Ela e a principal pista da cor menor.',
         },
       },
       {
@@ -1689,6 +1918,27 @@ async function seed() {
           options: ['C maior', 'C menor', 'C diminuto', 'A menor'],
           correctAnswer: 'C maior',
           feedback: 'C, E e G formam C maior: raiz C, terça maior E e quinta justa G.',
+        },
+      },
+      {
+        lessonOrder: 8,
+        type: 'multiple_choice',
+        prompt: 'Qual acorde tem as notas A C E?',
+        payload: {
+          options: ['A menor', 'A maior', 'C maior', 'E diminuto'],
+          correctAnswer: 'A menor',
+          feedback: 'A, C e E formam A menor. A nota C e a terça menor em relacao a A.',
+        },
+      },
+      {
+        lessonOrder: 8,
+        type: 'chord_builder',
+        prompt: 'Avaliação: construa um acorde maior de D',
+        payload: {
+          rootNote: 'D',
+          chordType: 'Major',
+          answer: 'D F# A',
+          feedback: 'D maior usa D, F# e A. O F# e a terça maior do acorde.',
         },
       },
     ];
@@ -1828,6 +2078,16 @@ async function seed() {
         },
       },
       {
+        lessonOrder: 2,
+        type: 'multiple_choice',
+        prompt: 'No campo maior, qual grau costuma ser tônica?',
+        payload: {
+          options: ['I', 'V', 'vii', 'iii'],
+          correctAnswer: 'I',
+          feedback: 'O I grau e a tônica: a sensação de casa e repouso principal do campo.',
+        },
+      },
+      {
         lessonOrder: 3,
         type: 'harmonic_field_builder',
         prompt: 'Monte o campo harmônico de C',
@@ -1858,6 +2118,16 @@ async function seed() {
         },
       },
       {
+        lessonOrder: 4,
+        type: 'multiple_choice',
+        prompt: 'Em G maior, qual acorde tem função subdominante?',
+        payload: {
+          options: ['C', 'G', 'D', 'Em'],
+          correctAnswer: 'C',
+          feedback: 'Em G maior, C e o IV grau. O IV costuma ter função subdominante.',
+        },
+      },
+      {
         lessonOrder: 5,
         type: 'multiple_choice',
         prompt: 'Qual progressão corresponde a I-V-vi-IV em C maior?',
@@ -1885,6 +2155,26 @@ async function seed() {
           options: ['M m m M M m dim', 'M M M m m dim M', 'm M m M dim M m', 'M m dim m M M m'],
           correctAnswer: 'M m m M M m dim',
           feedback: 'Todo campo harmonico maior segue: maior, menor, menor, maior, maior, menor, diminuto.',
+        },
+      },
+      {
+        lessonOrder: 6,
+        type: 'multiple_choice',
+        prompt: 'Qual acorde é o vi grau em C maior?',
+        payload: {
+          options: ['Am', 'C', 'F', 'G'],
+          correctAnswer: 'Am',
+          feedback: 'No campo de C maior: C, Dm, Em, F, G, Am, Bdim. O vi grau e Am.',
+        },
+      },
+      {
+        lessonOrder: 6,
+        type: 'harmonic_field_builder',
+        prompt: 'Avaliação: monte o campo harmônico de F',
+        payload: {
+          key: 'F',
+          answer: ['F', 'Gm', 'Am', 'Bb', 'C', 'Dm', 'Edim'],
+          feedback: 'F maior segue M m m M M m dim: F, Gm, Am, Bb, C, Dm, Edim.',
         },
       },
     ];
@@ -2038,6 +2328,16 @@ async function seed() {
         },
       },
       {
+        lessonOrder: 2,
+        type: 'multiple_choice',
+        prompt: 'Na progressão G C D G, qual acorde parece casa?',
+        payload: {
+          options: ['G', 'C', 'D', 'Em'],
+          correctAnswer: 'G',
+          feedback: 'G abre e fecha a progressao, criando sensacao de retorno. Isso sugere G como tônica.',
+        },
+      },
+      {
         lessonOrder: 3,
         type: 'multiple_choice',
         prompt: 'Qual escala combina primeiro com os acordes G, C, D e Em?',
@@ -2055,6 +2355,16 @@ async function seed() {
           options: ['I V vi IV', 'I IV V vi', 'ii V I IV', 'V vi IV I'],
           correctAnswer: 'I V vi IV',
           feedback: 'Em C maior: C=I, G=V, Am=vi e F=IV.',
+        },
+      },
+      {
+        lessonOrder: 4,
+        type: 'multiple_choice',
+        prompt: 'Em G maior, a progressao G D Em C vira quais graus?',
+        payload: {
+          options: ['I V vi IV', 'I IV V vi', 'V I vi IV', 'vi IV I V'],
+          correctAnswer: 'I V vi IV',
+          feedback: 'Em G maior: G=I, D=V, Em=vi e C=IV.',
         },
       },
       {
@@ -2085,6 +2395,26 @@ async function seed() {
           options: ['Usar notas, ritmo, escalas e acordes para entender musicas reais', 'Decorar nomes sem ouvir', 'Ignorar progressões', 'Usar apenas uma nota'],
           correctAnswer: 'Usar notas, ritmo, escalas e acordes para entender musicas reais',
           feedback: 'Aplicação musical junta os fundamentos para ler, criar e acompanhar musicas.',
+        },
+      },
+      {
+        lessonOrder: 7,
+        type: 'multiple_choice',
+        prompt: 'Ao analisar uma música simples, qual caminho e mais musical?',
+        payload: {
+          options: ['Achar tom, progressão, ritmo e pontos de repouso', 'Decorar apenas a primeira nota', 'Ignorar os acordes e olhar so BPM', 'Trocar todo acorde por C'],
+          correctAnswer: 'Achar tom, progressão, ritmo e pontos de repouso',
+          feedback: 'Aplicar teoria significa juntar pistas: tom, acordes, ritmo, tensão e repouso.',
+        },
+      },
+      {
+        lessonOrder: 7,
+        type: 'rhythm_tap',
+        prompt: 'Avaliação aplicada: marque trocas em I-V-vi-IV',
+        payload: {
+          bpm: 72,
+          pattern: [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0],
+          feedback: 'Este desenho simula uma troca de acorde por tempo forte. O foco e manter a progressao organizada no pulso.',
         },
       },
     ];
@@ -2208,10 +2538,21 @@ async function seed() {
         type: 'audio_recognition',
         prompt: 'Qual nota está tocando?',
         payload: {
-          audio: 'note_C4.mp3',
+          audio: 'note_C4.wav',
           options: ['C', 'D', 'E', 'F'],
           correctAnswer: 'C',
           feedback: 'A referencia simulada e C. Use este ponto como casa para comparar outras notas.',
+        },
+      },
+      {
+        lessonOrder: 1,
+        type: 'audio_recognition',
+        prompt: 'Qual nota parece mais alta que C no exemplo simulado?',
+        payload: {
+          audio: 'note_E4.wav',
+          options: ['E', 'C', 'D', 'F'],
+          correctAnswer: 'E',
+          feedback: 'A referencia simulada e E. Compare com C: E aparece mais acima e ajuda a treinar direcao melodica.',
         },
       },
       {
@@ -2225,11 +2566,22 @@ async function seed() {
         },
       },
       {
+        lessonOrder: 2,
+        type: 'audio_recognition',
+        prompt: 'O intervalo simulado soa como quinta ou segunda?',
+        payload: {
+          audio: 'interval_C_G.wav',
+          options: ['Quinta', 'Segunda', 'Sétima', 'Semitom'],
+          correctAnswer: 'Quinta',
+          feedback: 'C para G e uma quinta. Ela costuma soar aberta, estavel e muito comum em melodias e acordes.',
+        },
+      },
+      {
         lessonOrder: 3,
         type: 'audio_recognition',
         prompt: 'A escala simulada soa maior ou menor?',
         payload: {
-          audio: 'scale_major_C.mp3',
+          audio: 'scale_major_C.wav',
           options: ['Maior', 'Menor', 'Diminuta', 'Aumentada'],
           correctAnswer: 'Maior',
           feedback: 'A escala maior costuma soar aberta e estavel.',
@@ -2240,7 +2592,7 @@ async function seed() {
         type: 'audio_recognition',
         prompt: 'Qual tipo de acorde está tocando?',
         payload: {
-          audio: 'chord_C_major.mp3',
+          audio: 'chord_C_major.wav',
           options: ['Maior', 'Menor', 'Diminuto', 'Aumentado'],
           correctAnswer: 'Maior',
           feedback: 'Acorde maior tem raiz, terça maior e quinta justa.',
@@ -2257,6 +2609,17 @@ async function seed() {
         },
       },
       {
+        lessonOrder: 5,
+        type: 'audio_recognition',
+        prompt: 'A progressão simulada parece resolver para casa?',
+        payload: {
+          audio: 'progression_G_C.wav',
+          options: ['Sim, dominante para tônica', 'Nao, BPM para semibreve', 'Sim, sustenido para bemol', 'Nao, escala para pausa'],
+          correctAnswer: 'Sim, dominante para tônica',
+          feedback: 'Uma ida de dominante para tônica costuma dar sensacao clara de resolucao.',
+        },
+      },
+      {
         lessonOrder: 6,
         type: 'multiple_choice',
         prompt: 'Qual atitude melhora mais o treino auditivo?',
@@ -2264,6 +2627,27 @@ async function seed() {
           options: ['Comparar sons com calma e repetir', 'Chutar rapidamente', 'Ignorar feedback', 'Estudar apenas leitura visual'],
           correctAnswer: 'Comparar sons com calma e repetir',
           feedback: 'Treino auditivo depende de comparação, repetição e atenção ao feedback.',
+        },
+      },
+      {
+        lessonOrder: 6,
+        type: 'multiple_choice',
+        prompt: 'Depois de errar um reconhecimento auditivo, qual proximo passo ajuda mais?',
+        payload: {
+          options: ['Ouvir de novo e comparar com a referencia', 'Pular o feedback', 'Aumentar o BPM sem repetir', 'Escolher sempre a primeira opcao'],
+          correctAnswer: 'Ouvir de novo e comparar com a referencia',
+          feedback: 'O erro vira treino quando voce compara novamente, percebe a diferenca e cria uma referencia mais clara.',
+        },
+      },
+      {
+        lessonOrder: 6,
+        type: 'audio_recognition',
+        prompt: 'Avaliação auditiva: o acorde simulado e maior ou menor?',
+        payload: {
+          audio: 'chord_A_minor.wav',
+          options: ['Menor', 'Maior', 'Aumentado', 'Diminuto'],
+          correctAnswer: 'Menor',
+          feedback: 'A menor tem terça menor, que tende a soar mais fechada que a terça maior.',
         },
       },
     ];
