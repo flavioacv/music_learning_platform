@@ -446,33 +446,67 @@ class _MetricCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(icon, color: theme.colorScheme.primary, size: 28),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final compact = constraints.maxWidth < 180;
+          final iconBox = Container(
+            width: compact ? 52 : 56,
+            height: compact ? 52 : 56,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
             ),
-            const SizedBox(width: 16),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(label, style: theme.textTheme.labelLarge),
-                Text(
+            child: Icon(icon, color: theme.colorScheme.primary, size: 28),
+          );
+          final textBlock = Column(
+            crossAxisAlignment: compact
+                ? CrossAxisAlignment.center
+                : CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.labelLarge,
+              ),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: compact ? Alignment.center : Alignment.centerLeft,
+                child: Text(
                   value,
+                  maxLines: 1,
                   style: theme.textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.w900,
                   ),
                 ),
-              ],
+              ),
+            ],
+          );
+
+          return ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 112),
+            child: Padding(
+              padding: EdgeInsets.all(compact ? 16 : 20),
+              child: compact
+                  ? Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        iconBox,
+                        const SizedBox(height: 10),
+                        textBlock,
+                      ],
+                    )
+                  : Row(
+                      children: [
+                        iconBox,
+                        const SizedBox(width: 16),
+                        Expanded(child: textBlock),
+                      ],
+                    ),
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
