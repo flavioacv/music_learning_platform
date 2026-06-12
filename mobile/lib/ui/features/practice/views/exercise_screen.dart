@@ -295,7 +295,7 @@ class _LessonResultView extends StatelessWidget {
         ).animate().scale(curve: Curves.easeOutBack),
         const SizedBox(height: 20),
         Text(
-          passed ? 'Lição dominada' : 'Vamos reforçar',
+          passed ? 'Treino concluído' : 'Vamos reforçar',
           textAlign: TextAlign.center,
           style: theme.textTheme.headlineMedium?.copyWith(
             fontWeight: FontWeight.w900,
@@ -304,7 +304,7 @@ class _LessonResultView extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         Text(
-          '$percent% de acerto',
+          '$percent% de compreensão',
           textAlign: TextAlign.center,
           style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w800,
@@ -312,7 +312,7 @@ class _LessonResultView extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          '${viewModel.correctAnswers} de ${viewModel.questionCount} exercícios corretos',
+          '${viewModel.correctAnswers} de ${viewModel.questionCount} etapas compreendidas',
           textAlign: TextAlign.center,
           style: theme.textTheme.bodyLarge?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
@@ -342,8 +342,8 @@ class _LessonResultView extends StatelessWidget {
             passed
                 ? isReview
                       ? 'Revisão concluída. O treino ajuda a fixar o conteúdo, mas XP só é concedido na primeira conclusão.'
-                      : 'Você atingiu a meta mínima de 80%. A lição será concluída e a próxima etapa será desbloqueada.'
-                : 'A meta mínima é 80%. Revise o feedback das questões e tente de novo para ganhar XP e desbloquear a próxima aula.',
+                      : 'Você praticou o suficiente para seguir. A lição será concluída e a próxima etapa será desbloqueada.'
+                : 'Ainda falta fixar alguns pontos. Revise o feedback, pratique de novo e use os erros como guia do que observar.',
             textAlign: TextAlign.center,
             style: theme.textTheme.bodyLarge?.copyWith(height: 1.45),
           ),
@@ -358,14 +358,14 @@ class _LessonResultView extends StatelessWidget {
                   ? 'Salvando progresso...'
                   : isReview
                   ? 'Finalizar revisão'
-                  : 'Concluir e ganhar XP',
+                  : 'Concluir treino',
             ),
           )
         else
           FilledButton.icon(
             onPressed: viewModel.retry,
             icon: const Icon(Icons.refresh),
-            label: const Text('Refazer exercícios'),
+            label: const Text('Praticar de novo'),
           ),
         const SizedBox(height: 12),
         if (!passed)
@@ -525,7 +525,7 @@ class _ExerciseContent extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
-                'Questão ${viewModel.questionIndex + 1} de ${viewModel.questionCount}',
+                'Etapa ${viewModel.questionIndex + 1} de ${viewModel.questionCount}',
                 style: const TextStyle(fontWeight: FontWeight.w800),
               ),
             ),
@@ -613,7 +613,7 @@ class _FeedbackCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      viewModel.isCorrect ? 'Excelente!' : 'Ops...',
+                      viewModel.isCorrect ? 'Entendido' : 'Vamos ajustar',
                       style: theme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w900,
                         color: viewModel.isCorrect
@@ -645,7 +645,7 @@ class _FeedbackCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 20),
             ),
             icon: Icon(isLast ? Icons.done_all : Icons.arrow_forward_rounded),
-            label: Text(isLast ? 'Finalizar Lição' : 'Próxima Questão'),
+            label: Text(isLast ? 'Finalizar treino' : 'Próxima etapa'),
           ),
         ],
       ),
